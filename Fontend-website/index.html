@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Webcam Interface</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<div class="topbar">
+			<span>📍 123 Đường ABC, Hà Nội</span>
+			<span>☎ 0123 456 789</span>
+			<span>✉ contact@example.com</span>
+		</div>
+
+		<header class="header">
+			<h1 class="title">Webcam Interface</h1>
+		</header>
+
+		<main class="main">
+			<div class="controls">
+				<div class="row control-row">
+					<label for="deviceSelect">Chọn camera:</label>
+					<select id="deviceSelect" class="device-select"></select>
+				</div>
+				<div class="row buttons control-row">
+					<button id="startBtn" class="btn start">Bật camera</button>
+					<button id="stopBtn" class="btn stop" disabled>Tắt camera</button>
+					<button id="captureBtn" class="btn capture" disabled>Chụp ảnh</button>
+				</div>
+				<div class="row status control-row">
+					<span id="statusText">Trạng thái: chưa bật</span>
+				</div>
+			</div>
+
+			<div class="camera-and-photo">
+				<video id="video" autoplay playsinline></video>
+				<div id="latestPhoto">
+					<p>Chưa có ảnh</p>
+				</div>
+			</div>
+		</main>
+
+		<script src="script.js"></script>
+	</body>
+</html>
