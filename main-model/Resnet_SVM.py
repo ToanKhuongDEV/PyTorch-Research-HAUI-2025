@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -14,8 +13,8 @@ from tqdm import tqdm
 import time
 
 # ==== CẤU HÌNH ====
-TRAIN_DIR = "E:/University/NCKH/Dataset/Other/NEU-DET/train"    # ⚠️ Sửa lại đường dẫn đúng
-TEST_DIR  = "E:/University/NCKH/Dataset/Other/NEU-DET/val" 
+TRAIN_DIR = "D:/DATASET/GC10-DET-DIVIDED/train"
+TEST_DIR  = "D:/DATASET/GC10-DET-DIVIDED/val"
 BATCH_SIZE = 32
 LR = 0.001
 NUM_EPOCHS = 50
