@@ -1,46 +1,510 @@
 <!DOCTYPE html>
 <html lang="vi">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Webcam Interface</title>
-		<link rel="stylesheet" href="styles.css" />
-	</head>
-	<body>
-		<div class="topbar">
-			<span>📍 123 Đường ABC, Hà Nội</span>
-			<span>☎ 0123 456 789</span>
-			<span>✉ contact@example.com</span>
-		</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <!-- <div class="logo-icon">
+                    <i class="fas fa-shield-alt" style="color: white;"></i>
+                </div> -->
+                <div class="logo-text">
+                    <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
+                    <!-- <p>Industrial Metal Surface Defect Detection System</p> -->
+                </div>
+            </div>
+            <!-- <div class="system-status">
+                <div class="status-indicator"></div>
+                <span>Hệ thống hoạt động</span>
+            </div> -->
+        </div>
+    </header>
 
-		<header class="header">
-			<h1 class="title">Webcam Interface</h1>
-		</header>
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Left Column - Camera Feed -->
+        <div class="left-column">
+            <!-- Camera Feed Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-camera"></i>
+                        Camera
+                    </h2>
+                    <div>
+                        <span class="badge badge-default" id="cameraStatus">Tắt</span>
+                        <span class="badge badge-destructive hidden" id="errorBadge">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Lỗi
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <select class="select" id="cameraSelect">
+                            <option value="">Chọn camera</option>
+                        </select>
+                        
+                        <button class="btn btn-default" id="startCameraBtn">
+                            <i class="fas fa-camera"></i>
+                            Bật Camera
+                        </button>
+                        
+                        <button class="btn btn-destructive" id="stopCameraBtn" disabled>
+                            <i class="fas fa-camera-slash"></i>
+                            Tắt Camera
+                        </button>
+                        
+                        <button class="btn btn-accent" id="captureBtn" disabled>
+                            <i class="fas fa-camera-retro"></i>
+                            Chụp Ảnh
+                        </button>
+                        
+                        <!-- <div class="zoom-controls">
+                            <button class="btn btn-outline btn-sm" id="zoomOutBtn" disabled>
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <span class="zoom-value" id="zoomValue">100%</span>
+                            <button class="btn btn-outline btn-sm" id="zoomInBtn" disabled>
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="btn btn-outline btn-sm" id="resetZoomBtn" disabled>
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div> -->
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div class="hidden" id="errorMessage">
+                        <p class="text-sm" id="errorText"></p>
+                    </div>
+                    
+                    <!-- Video Feed -->
+                    <div class="video-container">
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <i class="fas fa-camera"></i>
+                            <p>Camera chưa được khởi động</p>
+                            <p class="text-sm">Chọn camera và nhấn "Bật Camera" để bắt đầu</p>
+                        </div>
+                        <video class="video-feed hidden" id="videoFeed" autoplay playsinline></video>
+                        <div class="video-overlay hidden" id="videoOverlay">
+                            <div class="grid-overlay">
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                                <div class="grid-cell"></div>
+                            </div>
+                            <div class="crosshair"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - System Status and Captured Images -->
+        <div class="right-column">
+            <!-- System Status Card - Chỉnh sửa để ôm content -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-cog"></i>
+                        Trạng Thái Hệ Thống
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="status-container">
+                        <div class="info-row">
+                            <span>Camera</span>
+                            <span class="badge badge-secondary" id="systemCameraStatus">Tắt</span>
+                        </div>
+                        <!-- <div class="info-row">
+                            <span>AI Detection</span>
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle"></i>
+                                Sẵn sàng
+                            </span>
+                        </div> -->
+                        <div class="info-row">
+                            <span>Ảnh đã chụp</span>
+                            <span class="badge badge-outline" id="capturedCount">0 ảnh</span>
+                        </div>
+                    </div>
+                    
+                    <!-- System Info -->
+                    <!-- <div class="system-info">
+                        <div class="info-row">
+                            <span>Độ chính xác hệ thống</span>
+                            <span class="info-value text-green">98.5%</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Thời gian xử lý</span>
+                            <span class="info-value" id="processingTime">0ms</span>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+            
+            <!-- Captured Images Card - Chỉnh sửa để ôm content -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-image"></i>
+                        Ảnh Đã Chụp
+                    </h2>
+                    <button class="btn btn-outline btn-sm hidden" id="clearAllBtn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div class="images-container">
+                        <div class="empty-state" id="emptyState">
+                            <i class="fas fa-image"></i>
+                            <p>Chưa có ảnh nào được chụp</p>
+                        </div>
+                        <div class="image-list hidden" id="imageList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-		<main class="main">
-			<div class="controls">
-				<div class="row control-row">
-					<label for="deviceSelect">Chọn camera:</label>
-					<select id="deviceSelect" class="device-select"></select>
-				</div>
-				<div class="row buttons control-row">
-					<button id="startBtn" class="btn start">Bật camera</button>
-					<button id="stopBtn" class="btn stop" disabled>Tắt camera</button>
-					<button id="captureBtn" class="btn capture" disabled>Chụp ảnh</button>
-				</div>
-				<div class="row status control-row">
-					<span id="statusText">Trạng thái: chưa bật</span>
-				</div>
-			</div>
+    <!-- Hidden canvas for image capture -->
+    <canvas id="canvas" class="hidden"></canvas>
 
-			<div class="camera-and-photo">
-				<video id="video" autoplay playsinline></video>
-				<div id="latestPhoto">
-					<p>Chưa có ảnh</p>
-				</div>
-			</div>
-		</main>
+    <!-- Image Preview Modal -->
+    <div class="modal-overlay hidden" id="imageModal">
+        <div class="modal-content">
+            <button class="btn btn-outline modal-close" id="closeModalBtn">
+                <i class="fas fa-times"></i>
+            </button>
+            <img class="modal-image" id="modalImage" src="" alt="Preview">
+            <div class="modal-actions">
+                <div id="modalAnalysisStatus"></div>
+                <div>
+                    <button class="btn btn-outline btn-sm" id="downloadModalBtn">
+                        <i class="fas fa-download"></i>
+                        Tải xuống
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		<script src="script.js"></script>
-	</body>
+    <script>
+        // JavaScript code sẽ được thêm ở đây để xử lý tương tác
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo các biến và state
+            let isStreaming = false;
+            let currentStream = null;
+            let capturedImages = [];
+            let zoomLevel = 1;
+            
+            // Lấy các phần tử DOM
+            const videoFeed = document.getElementById('videoFeed');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const videoOverlay = document.getElementById('videoOverlay');
+            const cameraSelect = document.getElementById('cameraSelect');
+            const startCameraBtn = document.getElementById('startCameraBtn');
+            const stopCameraBtn = document.getElementById('stopCameraBtn');
+            const captureBtn = document.getElementById('captureBtn');
+            const zoomInBtn = document.getElementById('zoomInBtn');
+            const zoomOutBtn = document.getElementById('zoomOutBtn');
+            const resetZoomBtn = document.getElementById('resetZoomBtn');
+            const zoomValue = document.getElementById('zoomValue');
+            const cameraStatus = document.getElementById('cameraStatus');
+            const systemCameraStatus = document.getElementById('systemCameraStatus');
+            const errorBadge = document.getElementById('errorBadge');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const capturedCount = document.getElementById('capturedCount');
+            const emptyState = document.getElementById('emptyState');
+            const imageList = document.getElementById('imageList');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const imageModal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const downloadModalBtn = document.getElementById('downloadModalBtn');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Khởi tạo ứng dụng
+            getCameras();
+            
+            // Lấy danh sách camera
+            async function getCameras() {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    cameraSelect.innerHTML = '<option value="">Chọn camera</option>';
+                    videoDevices.forEach(device => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${cameraSelect.options.length}`;
+                        cameraSelect.appendChild(option);
+                    });
+                } catch (err) {
+                    showError('Không thể truy cập danh sách camera');
+                }
+            }
+            
+            // Bật camera
+            async function startCamera() {
+                try {
+                    const deviceId = cameraSelect.value;
+                    if (!deviceId) {
+                        showError('Vui lòng chọn một camera');
+                        return;
+                    }
+                    
+                    if (currentStream) {
+                        currentStream.getTracks().forEach(track => track.stop());
+                    }
+                    
+                    const constraints = {
+                        video: {
+                            deviceId: { exact: deviceId },
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    currentStream = stream;
+                    videoFeed.srcObject = stream;
+                    
+                    // Hiển thị video và ẩn placeholder
+                    videoFeed.classList.remove('hidden');
+                    videoOverlay.classList.remove('hidden');
+                    videoPlaceholder.classList.add('hidden');
+                    
+                    // Cập nhật trạng thái
+                    isStreaming = true;
+                    updateCameraStatus(true);
+                    startCameraBtn.disabled = true;
+                    stopCameraBtn.disabled = false;
+                    captureBtn.disabled = false;
+                    zoomInBtn.disabled = false;
+                    zoomOutBtn.disabled = false;
+                    resetZoomBtn.disabled = false;
+                    
+                    // Ẩn thông báo lỗi nếu có
+                    hideError();
+                    
+                } catch (err) {
+                    showError('Không thể khởi động camera. Vui lòng kiểm tra kết nối.');
+                    updateCameraStatus(false);
+                }
+            }
+            
+            // Tắt camera
+            function stopCamera() {
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                    currentStream = null;
+                }
+                
+                videoFeed.srcObject = null;
+                videoFeed.classList.add('hidden');
+                videoOverlay.classList.add('hidden');
+                videoPlaceholder.classList.remove('hidden');
+                
+                isStreaming = false;
+                updateCameraStatus(false);
+                startCameraBtn.disabled = false;
+                stopCameraBtn.disabled = true;
+                captureBtn.disabled = true;
+                zoomInBtn.disabled = true;
+                zoomOutBtn.disabled = true;
+                resetZoomBtn.disabled = true;
+            }
+            
+            // Cập nhật trạng thái camera
+            function updateCameraStatus(streaming) {
+                if (streaming) {
+                    cameraStatus.textContent = 'Đang hoạt động';
+                    cameraStatus.className = 'badge badge-default';
+                    systemCameraStatus.textContent = 'Hoạt động';
+                    systemCameraStatus.className = 'badge badge-default';
+                } else {
+                    cameraStatus.textContent = 'Tắt';
+                    cameraStatus.className = 'badge badge-secondary';
+                    systemCameraStatus.textContent = 'Tắt';
+                    systemCameraStatus.className = 'badge badge-secondary';
+                }
+            }
+            
+            // Hiển thị lỗi
+            function showError(message) {
+                errorText.textContent = message;
+                errorBadge.classList.remove('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+            
+            // Ẩn lỗi
+            function hideError() {
+                errorBadge.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+            }
+            
+            // Chụp ảnh
+            function captureImage() {
+                if (!isStreaming) return;
+                
+                canvas.width = videoFeed.videoWidth;
+                canvas.height = videoFeed.videoHeight;
+                ctx.drawImage(videoFeed, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = canvas.toDataURL('image/jpeg', 0.9);
+                capturedImages.unshift(imageData);
+                
+                updateCapturedImages();
+            }
+            
+            // Cập nhật danh sách ảnh đã chụp
+            function updateCapturedImages() {
+                capturedCount.textContent = `${capturedImages.length} ảnh`;
+                
+                if (capturedImages.length > 0) {
+                    emptyState.classList.add('hidden');
+                    imageList.classList.remove('hidden');
+                    clearAllBtn.classList.remove('hidden');
+                    
+                    imageList.innerHTML = '';
+                    capturedImages.forEach((image, index) => {
+                        const imageItem = document.createElement('div');
+                        imageItem.className = 'image-item';
+                        
+                        imageItem.innerHTML = `
+                            <img src="${image}" class="image-thumb" alt="Ảnh ${index + 1}" data-index="${index}">
+                            <div class="image-info">
+                                <div class="image-name">Ảnh ${index + 1}</div>
+                                <div class="image-time">${new Date().toLocaleTimeString('vi-VN')}</div>
+                            </div>
+                            <div class="image-actions">
+                                <button class="btn btn-outline btn-sm view-btn" data-index="${index}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm download-btn" data-index="${index}">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        imageList.appendChild(imageItem);
+                    });
+                    
+                    // Thêm event listeners cho các nút
+                    document.querySelectorAll('.view-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const index = e.currentTarget.getAttribute('data-index');
+                            openImageModal(capturedImages[index]);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.download-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const index = e.currentTarget.getAttribute('data-index');
+                            downloadImage(capturedImages[index], index);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.image-thumb').forEach(img => {
+                        img.addEventListener('click', (e) => {
+                            const index = e.currentTarget.getAttribute('data-index');
+                            openImageModal(capturedImages[index]);
+                        });
+                    });
+                    
+                } else {
+                    emptyState.classList.remove('hidden');
+                    imageList.classList.add('hidden');
+                    clearAllBtn.classList.add('hidden');
+                }
+            }
+            
+            // Xóa tất cả ảnh
+            function clearAllImages() {
+                capturedImages = [];
+                updateCapturedImages();
+            }
+            
+            // Tải ảnh
+            function downloadImage(imageData, index) {
+                const link = document.createElement('a');
+                link.href = imageData;
+                link.download = `metal-surface-${Date.now()}-${index}.jpg`;
+                link.click();
+            }
+            
+            // Mở modal xem ảnh
+            function openImageModal(imageData) {
+                modalImage.src = imageData;
+                imageModal.classList.remove('hidden');
+            }
+            
+            // Đóng modal
+            function closeImageModal() {
+                imageModal.classList.add('hidden');
+            }
+            
+            // Xử lý phóng to/thu nhỏ
+            function updateZoom() {
+                zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;
+                videoFeed.style.transform = `scaleX(-1) scale(${zoomLevel})`;
+            }
+            
+            // Gán sự kiện
+            startCameraBtn.addEventListener('click', startCamera);
+            stopCameraBtn.addEventListener('click', stopCamera);
+            captureBtn.addEventListener('click', captureImage);
+            clearAllBtn.addEventListener('click', clearAllImages);
+            closeModalBtn.addEventListener('click', closeImageModal);
+            downloadModalBtn.addEventListener('click', function() {
+                const index = capturedImages.findIndex(img => img === modalImage.src);
+                if (index !== -1) {
+                    downloadImage(capturedImages[index], index);
+                }
+            });
+            
+            zoomInBtn.addEventListener('click', function() {
+                if (zoomLevel < 3) {
+                    zoomLevel += 0.1;
+                    updateZoom();
+                }
+            });
+            
+            zoomOutBtn.addEventListener('click', function() {
+                if (zoomLevel > 0.5) {
+                    zoomLevel -= 0.1;
+                    updateZoom();
+                }
+            });
+            
+            resetZoomBtn.addEventListener('click', function() {
+                zoomLevel = 1;
+                updateZoom();
+            });
+            
+            // Kiểm tra hỗ trợ camera
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Trình duyệt của bạn không hỗ trợ truy cập camera');
+                startCameraBtn.disabled = true;
+            }
+        });
+    </script>
+</body>
 </html>
