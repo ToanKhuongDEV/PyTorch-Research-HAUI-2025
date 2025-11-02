@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Header -->
@@ -14,13 +14,41 @@
             <div class="logo">
                 <div class="logo-text">
                     <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
+                    <p>Industrial Metal Surface Defect Detection System</p>
                 </div>
             </div>
         </div>
     </header>
 
+    <div class="nav-bar">
+        <button class="nav-button active" data-target="capture">Chụp Ảnh</button>
+        <button class="nav-button" data-target="video" onclick="location.href='video.html'">Video Realtime</button>
+    </div>
+    
     <!-- Main Content -->
     <main class="main-container">
+        <!-- System Status Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-cog"></i>
+                    Trạng Thái Hệ Thống
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="status-container">
+                    <div class="info-row">
+                        <span>Camera</span>
+                        <span class="badge badge-secondary" id="systemCameraStatus">Tắt</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Ảnh đã chụp</span>
+                        <span class="badge badge-outline" id="capturedCount">0 ảnh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Left Column - Camera Feed -->
         <div class="left-column">
             <!-- Camera Feed Card -->
@@ -51,6 +79,11 @@
                         <button class="btn btn-accent" id="captureBtn" disabled>
                             <i class="fas fa-camera-retro"></i>
                             Chụp Ảnh
+                        </button>
+
+                        <button class="btn btn-accent" id="uploadImageBtn">
+                            <i class="fas fa-upload"></i>
+                            Upload Ảnh
                         </button>
                     </div>
                     
@@ -88,27 +121,6 @@
         
         <!-- Right Column - System Status and Captured Images -->
         <div class="right-column">
-            <!-- System Status Card -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-cog"></i>
-                        Trạng Thái Hệ Thống
-                    </h2>
-                </div>
-                <div class="card-content">
-                    <div class="status-container">
-                        <div class="info-row">
-                            <span>Camera</span>
-                            <span class="badge badge-secondary" id="systemCameraStatus">Tắt</span>
-                        </div>
-                        <div class="info-row">
-                            <span>Ảnh đã chụp</span>
-                            <span class="badge badge-outline" id="capturedCount">0 ảnh</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
             
             <!-- Captured Images Card -->
             <div class="card">
@@ -137,15 +149,47 @@
     <!-- Hidden canvas for image capture -->
     <canvas id="canvas" class="hidden"></canvas>
 
+    <!-- Hidden input file for image upload -->
+    <input type="file" id="fileUploadInput" class="hidden" accept="image/*">
+
     <!-- Image Preview Modal -->
     <div class="modal-overlay hidden" id="imageModal">
         <div class="modal-content">
             <button class="btn btn-outline modal-close" id="closeModalBtn">
                 <i class="fas fa-times"></i>
             </button>
-            <img class="modal-image" id="modalImage" src="" alt="Preview">
-            <div class="modal-actions">
-                <div>
+            
+            <div class="modal-image-container">
+                <img class="modal-image" id="modalImage" src="" alt="Preview">
+            </div>
+            
+            <div class="modal-info">
+                <div class="info-section">
+                    <h3 class="info-section-title">📊 Thông số cơ bản của ảnh</h3>
+                    <div class="info-grid" id="basicInfo"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h3 class="info-section-title">📷 Thông số camera & chụp ảnh</h3>
+                    <div class="info-grid" id="cameraInfo"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h3 class="info-section-title">🌡️ Thông số môi trường & điều kiện chụp</h3>
+                    <div class="info-grid" id="environmentInfo"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h3 class="info-section-title">⚙️ Thông số hệ thống & xử lý ảnh</h3>
+                    <div class="info-grid" id="systemInfo"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h3 class="info-section-title">🏭 Thông số sản xuất kèm theo ảnh</h3>
+                    <div class="info-grid" id="productionInfo"></div>
+                </div>
+                
+                <div class="modal-actions">
                     <button class="btn btn-outline btn-sm" id="downloadModalBtn">
                         <i class="fas fa-download"></i>
                         Tải xuống
@@ -155,6 +199,16 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Module Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/metadata.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/modal.js"></script>
+    
+    <!-- Main Application -->
+    <script src="js/main.js"></script>
 </body>
 </html>

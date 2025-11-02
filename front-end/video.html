@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Realtime - Hệ Thống Nhận Diện Khuyết Tật Kim Loại</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-text">
+                    <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
+                    <p>Industrial Metal Surface Defect Detection System</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="nav-bar">
+        <button class="nav-button" data-target="capture" onclick="location.href='photo.html'">Chụp Ảnh</button>
+        <button class="nav-button active" data-target="video">Video Realtime</button>
+    </div>
+    
+    <div class="main-container">    
+        <div class="video-section">
+            <h2>Video Realtime</h2>
+            <div class="video-feed">
+                <p>Video feed sẽ hiển thị ở đây khi camera được bật</p>
+            </div>
+            
+            <div class="video-controls">
+                <button class="btn btn-default" id="start-video">
+                    <i class="fas fa-camera"></i>
+                    Bật Camera
+                </button>
+                <button class="btn btn-stop" id="stop-video">
+                    <i class="fas fa-stop"></i>
+                    Dừng Video
+                </button>
+            </div>
+        </div>
+        
+        <div class="system-status">
+            <div class="status-item">
+                <h3>Camera</h3>
+                <p>Đang tắt</p>
+            </div>
+            <div class="status-item">
+                <h3>Tổng số ảnh</h3>
+                <p>0</p>
+            </div>
+            <div class="status-item">
+                <h3>Khuyết tật phát hiện</h3>
+                <p>0</p>
+            </div>
+            <div class="status-item">
+                <h3>Tỷ lệ phát hiện</h3>
+                <p>0%</p>
+            </div>
+        </div>
+        <div class="defect-info">
+            <h3>Thông Tin Khuyết Tật Phát Hiện</h3>
+            <div class="defect-list">
+                <div class="defect-item">
+                    <h4>Vết xước</h4>
+                    <p>Độ tin cậy: 92%</p>
+                    <p>Vị trí: (120, 45)</p>
+                </div>
+                <div class="defect-item">
+                    <h4>Lỗi bề mặt</h4>
+                    <p>Độ tin cậy: 87%</p>
+                    <p>Vị trí: (200, 150)</p>
+                </div>
+                <div class="defect-item">
+                    <h4>Biến dạng</h4>
+                    <p>Độ tin cậy: 78%</p>
+                    <p>Vị trí: (75, 280)</p>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- <div class="statistics">
+            <h3>Thống Kê Phát Hiện</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>Tổng số khuyết tật</h4>
+                    <p>15</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Khuyết tật nghiêm trọng</h4>
+                    <p>3</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Tỷ lệ phát hiện</h4>
+                    <p>98.5%</p>
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <script>
+        // Xử lý các nút chức năng
+        document.getElementById('start-video').addEventListener('click', function() {
+            alert('Đã bật video realtime!');
+            // Ở đây sẽ là code để khởi động video realtime
+        });
+        
+        document.getElementById('stop-video').addEventListener('click', function() {
+            alert('Đã dừng video!');
+            // Ở đây sẽ là code để dừng video realtime
+        });
+    </script>
+</body>
+</html>

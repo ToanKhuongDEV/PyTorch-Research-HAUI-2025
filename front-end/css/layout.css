@@ -1,0 +1,64 @@
+/* Main layout */
+.main-container {
+	flex: 1;
+	display: grid;
+	
+	/* 1. Định nghĩa các "vùng" layout */
+	grid-template-areas:
+		"status status"
+		"left   right";
+	
+	/* 2. Kích thước cột (giữ nguyên yêu cầu 2fr 1fr) */
+	grid-template-columns: 2fr 1fr;
+	
+	/* 3. Kích thước hàng: Hàng 'status' tự động, hàng 'left'/'right' lấp đầy */
+	grid-template-rows: auto 1fr;
+	
+	gap: 1.5rem;
+	padding: 1.5rem;
+	overflow: hidden;
+	max-width: 100%;
+	height: calc(100vh - 80px); /* Giữ nguyên từ file cũ */
+}
+
+/* 4. Gán các phần tử HTML vào "vùng" đã định nghĩa */
+
+/* Gán card đầu tiên (Trạng Thái) vào vùng 'status' */
+.main-container > .card:first-child {
+	grid-area: status;
+	flex: 0 0 auto; /* Đảm bảo card này không bị co dãn sai */
+}
+
+.left-column {
+	grid-area: left;
+	/* Cần thiết lập lại flex/height để card bên trong co dãn đúng */
+	display: flex;
+	flex-direction: column;
+	min-height: 0; /* Sửa lỗi co dãn của grid item */
+}
+
+.right-column {
+	grid-area: right;
+	/* Cần thiết lập lại flex/height để card bên trong co dãn đúng */
+	display: flex;
+	flex-direction: column;
+	min-height: 0; /* Sửa lỗi co dãn của grid item */
+}
+
+/* 5. Đảm bảo 2 card chính lấp đầy 2 cột và tự cuộn */
+
+/* Làm cho card bên trong cột trái/phải lấp đầy 100% chiều cao */
+.left-column > .card,
+.right-column > .card {
+	flex: 1; /* Quan trọng: lấp đầy không gian còn lại */
+	display: flex;
+	flex-direction: column;
+	overflow: hidden; /* Ẩn cuộn ở card */
+}
+
+/* Làm cho *nội dung* bên trong card có thể cuộn */
+.left-column > .card > .card-content,
+.right-column > .card > .card-content {
+	flex: 1;
+	overflow: auto; /* Cho phép cuộn nội dung (ví dụ: danh sách ảnh) */
+}

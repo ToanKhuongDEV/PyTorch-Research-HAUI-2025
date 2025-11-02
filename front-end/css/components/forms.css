@@ -1,0 +1,241 @@
+/* Controls */
+.camera-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	align-items: center;
+	margin-bottom: 1rem;
+	flex-shrink: 0;
+}
+
+.select {
+	padding: 0.5rem;
+	border-radius: var(--radius);
+	border: 1px solid var(--border);
+	background-color: var(--input);
+	font-size: 0.875rem;
+	min-width: 200px;
+}
+
+.zoom-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+
+.zoom-value {
+	font-size: 0.875rem;
+	font-family: monospace;
+	min-width: 3rem;
+	text-align: center;
+}
+
+/* Video feed */
+.video-container {
+	position: relative;
+	background-color: var(--muted);
+	border-radius: var(--radius);
+	overflow: hidden;
+	flex: 1;
+	min-height: 300px;
+}
+
+.video-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: var(--muted-foreground);
+	gap: 1rem;
+	padding: 2rem;
+	text-align: center;
+}
+
+.video-placeholder i {
+	font-size: 4rem;
+	opacity: 0.5;
+}
+
+.video-feed {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transform: scaleX(-1);
+}
+
+.video-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+}
+
+.grid-overlay {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+	width: 100%;
+	height: 100%;
+}
+
+.grid-cell {
+	border: 1px solid var(--accent);
+	opacity: 0.2;
+}
+
+.crosshair {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 2rem;
+	height: 2rem;
+	border: 2px solid var(--accent);
+	border-radius: 50%;
+	opacity: 0.6;
+}
+
+/* Captured images */
+.images-container {
+	max-height: none;
+	overflow-y: auto;
+	flex: 1;
+}
+
+.image-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.image-item {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	transition: background-color 0.2s;
+}
+
+.image-item:hover {
+	background-color: var(--muted);
+}
+
+.image-thumb {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: var(--radius);
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.image-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.image-name {
+	font-size: 0.875rem;
+	font-weight: 500;
+	margin-bottom: 0.25rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.image-time {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	margin-bottom: 0.25rem;
+}
+
+.image-classification {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.image-classification .confidence {
+	font-size: 0.7rem;
+	color: var(--muted-foreground);
+	font-family: monospace;
+}
+
+.image-actions {
+	display: flex;
+	gap: 0.25rem;
+	flex-shrink: 0;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 2rem;
+	color: var(--muted-foreground);
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.empty-state i {
+	font-size: 3rem;
+	opacity: 0.5;
+	margin-bottom: 1rem;
+}
+
+/* Pagination styles */
+.pagination-container {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.pagination {
+	display: flex;
+	gap: 0.25rem;
+	align-items: center;
+}
+
+.pagination-btn {
+	min-width: 2rem;
+	height: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.25rem;
+	font-size: 0.75rem;
+}
+
+.pagination-btn.active {
+	background-color: var(--primary);
+	color: var(--primary-foreground);
+	border-color: var(--primary);
+}
+
+.pagination-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.pagination-btn:not(:disabled):hover {
+	background-color: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.pagination-info {
+	font-size: 0.75rem;
+	color: var(--muted-foreground);
+	text-align: center;
+}

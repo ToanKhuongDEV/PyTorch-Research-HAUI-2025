@@ -1,0 +1,69 @@
+/* Responsive design */
+@media (max-width: 1024px) {
+	.main-container {
+		grid-template-columns: 1fr;
+	}
+	
+	.modal-content {
+		flex-direction: column;
+		width: 90vw;
+		height: 85vh;
+	}
+	
+	.modal-image-container {
+		flex: 0 0 50%;
+	}
+	
+	.modal-info {
+		border-left: none;
+		border-top: 1px solid #e9ecef;
+	}
+}
+
+@media (max-width: 768px) {
+	.camera-controls {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	
+	.zoom-controls {
+		margin-left: 0;
+		width: 100%;
+		justify-content: space-between;
+	}
+	
+	.header-container {
+		flex-direction: column;
+		gap: 1rem;
+		text-align: center;
+	}
+	
+	.main-container {
+		padding: 1rem;
+		gap: 1rem;
+	}
+	
+	.card-content {
+		padding: 1rem;
+	}
+	
+	.image-item {
+		flex-direction: column;
+		text-align: center;
+	}
+	
+	.image-actions {
+		flex-direction: row;
+		justify-content: center;
+		width: 100%;
+	}
+	
+	.info-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.modal-content {
+		width: 95vw;
+		height: 90vh;
+	}
+}

@@ -1,0 +1,70 @@
+/* Buttons */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius);
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	border: none;
+	gap: 0.5rem;
+}
+
+.btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.btn-default {
+	background-color: var(--primary);
+	color: var(--primary-foreground);
+}
+
+.btn-default:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+.btn-destructive {
+	background-color: var(--destructive);
+	color: var(--destructive-foreground);
+}
+
+.btn-destructive:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+.btn-accent {
+	background-color: var(--accent);
+	color: var(--accent-foreground);
+}
+
+.btn-accent:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+.btn-outline {
+	background-color: transparent;
+	border: 1px solid var(--border);
+	color: var(--foreground);
+}
+
+.btn-outline:hover:not(:disabled) {
+	background-color: var(--muted);
+}
+
+.btn-sm {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.75rem;
+}
+
+.btn-stop {
+	background-color: #e74c3c;
+	color: white;
+}
+
+.btn-stop:hover:not(:disabled) {
+	background-color: #c0392b;
+}
