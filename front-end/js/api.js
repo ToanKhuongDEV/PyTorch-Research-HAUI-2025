@@ -90,7 +90,7 @@ class APIManager {
             // Tạo FormData
             const formData = new FormData();
             // Tên 'image_file' phải khớp với alias 'image_file' trong app.py
-            formData.append("image_file", fileOrBlob, `validate-${Date.now()}.jpg`);
+            formData.append("file", fileOrBlob, `validate-${Date.now()}.jpg`);
 
             // Gửi đến API KIỂM TRA
             const response = await fetch(`${this.baseURL}/kiem-tra-anh`, {

@@ -173,7 +173,7 @@ async def predict(file: UploadFile = File(...)):
 
 # --- API ENDPOINT 2: KIỂM TRA TÍNH HỢP LỆ (Code mới) ---
 @app.post("/kiem-tra-anh")
-async def kiem_tra_anh(file: UploadFile = File(..., alias="image_file")):
+async def kiem_tra_anh(file: UploadFile = File(...)):
     """
     ENDPOINT 2: Kiểm tra xem ảnh có "đạt chuẩn" không.
     Frontend sẽ gọi endpoint này cho nút "Upload Ảnh".
