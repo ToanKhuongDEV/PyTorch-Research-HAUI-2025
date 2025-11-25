@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Realtime - Hệ Thống Nhận Diện Khuyết Tật Kim Loại</title>
+    <title>Video Realtime - Hệ Thống Nhận Diện Khuyết Tật</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -11,6 +11,7 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
+                <!-- <div class="logo-icon"><i class="fas fa-industry"></i></div> -->
                 <div class="logo-text">
                     <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
                     <p>Industrial Metal Surface Defect Detection System</p>
@@ -20,99 +21,318 @@
     </header>
 
     <div class="nav-bar">
-        <button class="nav-button" data-target="capture" onclick="location.href='photo.html'">Chụp Ảnh</button>
-        <button class="nav-button active" data-target="video">Video Realtime</button>
+        <button class="nav-button" onclick="location.href='photo.html'">Chụp Ảnh</button>
+        <button class="nav-button active">Video Realtime</button>
     </div>
     
-    <div class="main-container">    
-        <div class="video-section">
-            <h2>Video Realtime</h2>
-            <div class="video-feed">
-                <p>Video feed sẽ hiển thị ở đây khi camera được bật</p>
-            </div>
-            
-            <div class="video-controls">
-                <button class="btn btn-default" id="start-video">
-                    <i class="fas fa-camera"></i>
-                    Bật Camera
-                </button>
-                <button class="btn btn-stop" id="stop-video">
-                    <i class="fas fa-stop"></i>
-                    Dừng Video
-                </button>
-            </div>
-        </div>
+    <main class="main-container">
         
-        <div class="system-status">
-            <div class="status-item">
-                <h3>Camera</h3>
-                <p>Đang tắt</p>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">                    
+                    <i class="fas fa-cog"></i>
+                    Trạng thái hệ thống</h2>
             </div>
-            <div class="status-item">
-                <h3>Tổng số ảnh</h3>
-                <p>0</p>
-            </div>
-            <div class="status-item">
-                <h3>Khuyết tật phát hiện</h3>
-                <p>0</p>
-            </div>
-            <div class="status-item">
-                <h3>Tỷ lệ phát hiện</h3>
-                <p>0%</p>
-            </div>
-        </div>
-        <div class="defect-info">
-            <h3>Thông Tin Khuyết Tật Phát Hiện</h3>
-            <div class="defect-list">
-                <div class="defect-item">
-                    <h4>Vết xước</h4>
-                    <p>Độ tin cậy: 92%</p>
-                    <p>Vị trí: (120, 45)</p>
-                </div>
-                <div class="defect-item">
-                    <h4>Lỗi bề mặt</h4>
-                    <p>Độ tin cậy: 87%</p>
-                    <p>Vị trí: (200, 150)</p>
-                </div>
-                <div class="defect-item">
-                    <h4>Biến dạng</h4>
-                    <p>Độ tin cậy: 78%</p>
-                    <p>Vị trí: (75, 280)</p>
+            <div class="card-content">
+                <!-- <div class="system-status"> -->
+                <div class="status-container">
+                    <div class="info-row">
+                        <span>Camera</span>
+                        <span class="badge badge-secondary" id="status-cam">Tắt</span>
+                    </div>
+                    <div class="info-row">
+                        <span>FPS</span>
+                        <span class="badge badge-secondary" id="status-fps">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Số vật thể phát hiện</span>
+                        <span class="badge badge-secondary" id="status-objects">0</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Lỗi phát hiện gần nhất</span>
+                        <span class="badge badge-secondary" id="status-last-defect">0</span>
+                    </div>
+                    <!-- <div class="status-item">
+                        <h3>Trạng thái Camera</h3>
+                        <p id="status-cam" style="color: #e74c3c;">Đang tắt</p>
+                    </div> -->
+                    <!-- <div class="status-item">
+                        <h3>FPS Xử lý</h3>
+                        <p id="status-fps">0</p>
+                    </div>
+                    <div class="status-item">
+                        <h3>Số vật thể phát hiện</h3>
+                        <p id="status-objects">0</p>
+                    </div>
+                    <div class="status-item">
+                        <h3>Lỗi phát hiện gần nhất</h3>
+                        <p id="status-last-defect" style="font-size: 14px;">---</p>
+                    </div> -->
                 </div>
             </div>
         </div>
         
-        
-        <!-- <div class="statistics">
-            <h3>Thống Kê Phát Hiện</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h4>Tổng số khuyết tật</h4>
-                    <p>15</p>
+        <div class="left-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-video"></i> Camera Live Feed</h2>
                 </div>
-                <div class="stat-item">
-                    <h4>Khuyết tật nghiêm trọng</h4>
-                    <p>3</p>
-                </div>
-                <div class="stat-item">
-                    <h4>Tỷ lệ phát hiện</h4>
-                    <p>98.5%</p>
-                </div>
-            </div>
-        </div> -->
-    </div>
+                <div class="card-content">
+                    <div class="camera-controls">
+                        <button class="btn btn-default" id="start-video">
+                            <i class="fas fa-play"></i> Bắt đầu
+                        </button>
+                        <button class="btn btn-destructive" id="stop-video" disabled>
+                            <i class="fas fa-stop"></i> Dừng lại
+                        </button>
+                    </div>
 
-    <script>
-        // Xử lý các nút chức năng
-        document.getElementById('start-video').addEventListener('click', function() {
-            alert('Đã bật video realtime!');
-            // Ở đây sẽ là code để khởi động video realtime
-        });
+                    <div class="video-container" style="min-height: 480px; background: #000;">
+                        <div class="video-feed" id="video-display" style="position: relative; width: 100%; height: 100%;">
+                            <div class="video-placeholder" id="placeholder" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: #f1f5f9; z-index: 10;">
+                                <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                                <p>Nhấn "Bắt đầu" để chạy Video Realtime</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        document.getElementById('stop-video').addEventListener('click', function() {
-            alert('Đã dừng video!');
-            // Ở đây sẽ là code để dừng video realtime
+        <div class="right-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-clipboard-list"></i> Nhật Ký Phát Hiện</h2>
+                    <button class="btn btn-outline btn-sm" onclick="clearLogs()"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="card-content">
+                    <div class="images-container"> <div class="defect-list" id="log-container">
+                            <div class="empty-state">
+                                <p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/store.js"></script> <script src="js/api.js"></script>   <script>
+        // --- CẤU HÌNH ---
+        const FPS_TARGET = 5; // Giới hạn gửi 5 request/giây để server không bị quá tải
+        const FRAME_INTERVAL = 1000 / FPS_TARGET;
+
+        // --- DOM ELEMENTS ---
+        const startBtn = document.getElementById('start-video');
+        const stopBtn = document.getElementById('stop-video');
+        const displayDiv = document.getElementById('video-display');
+        const placeholder = document.getElementById('placeholder');
+        const logContainer = document.getElementById('log-container');
+        
+        // Status Elements
+        const stCam = document.getElementById('status-cam');
+        const stFps = document.getElementById('status-fps');
+        const stObj = document.getElementById('status-objects');
+        const stLast = document.getElementById('status-last-defect');
+
+        // Logic Variables
+        let videoElement = document.createElement('video');
+        videoElement.autoplay = true;
+        videoElement.playsInline = true;
+        
+        let canvas = document.createElement('canvas');
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.objectFit = "contain";
+        let ctx = canvas.getContext('2d');
+
+        let isRunning = false;
+        let stream = null;
+        let lastTime = 0;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+        let objectCount = 0;
+        
+        // Init API (Mock store null vì video mode ko dùng store)
+        const api = new APIManager({ getMetadata: () => {}, updateMetadata: () => {} });
+
+        // --- HÀM KHỞI ĐỘNG ---
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480, frameRate: { ideal: 15 } } 
+                });
+                
+                videoElement.srcObject = stream;
+                // Đợi video load metadata để set kích thước canvas
+                videoElement.onloadedmetadata = () => {
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    
+                    // Xóa placeholder, thêm canvas
+                    placeholder.classList.add('hidden'); // Dùng class hidden của utilities.css
+                    if (!displayDiv.contains(canvas)) {
+                        displayDiv.appendChild(canvas);
+                    }
+                    
+                    isRunning = true;
+                    updateStatusUI(true);
+                    loop(0);
+                };
+            } catch (err) {
+                alert("Không thể truy cập camera: " + err.message);
+            }
         });
+
+        // --- HÀM DỪNG ---
+        stopBtn.addEventListener('click', () => {
+            isRunning = false;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            placeholder.classList.remove('hidden');
+            if (displayDiv.contains(canvas)) {
+                displayDiv.removeChild(canvas);
+            }
+            updateStatusUI(false);
+        });
+
+        // --- UI UTILS ---
+        function updateStatusUI(active) {
+            if (active) {
+                stCam.textContent = "Đang chạy";
+                stCam.style.color = "#10b981"; // Green
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            } else {
+                stCam.textContent = "Đang tắt";
+                stCam.style.color = "#e74c3c"; // Red
+                stFps.textContent = "0";
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function clearLogs() {
+            logContainer.innerHTML = '<div class="empty-state"><p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p></div>';
+            objectCount = 0;
+            stObj.textContent = 0;
+            stLast.textContent = "---";
+        }
+
+        function addLog(message, conf, colorClass) {
+            // Xóa empty state nếu có
+            const emptyState = logContainer.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const item = document.createElement('div');
+            // Style inline nhanh hoặc dùng class defect-item từ cards.css
+            item.className = 'defect-item'; 
+            item.style.marginBottom = '10px';
+            item.style.padding = '10px';
+            item.style.borderLeft = `4px solid ${colorClass}`;
+            item.style.background = '#f8f9fa';
+            item.style.borderRadius = '4px';
+
+            const time = new Date().toLocaleTimeString('vi-VN');
+            
+            item.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>${message}</strong>
+                    <span style="font-size: 12px; color: #666;">${time}</span>
+                </div>
+                <div style="font-size: 13px; margin-top: 4px;">Độ tin cậy: ${(conf*100).toFixed(1)}%</div>
+            `;
+
+            // Thêm vào đầu danh sách
+            logContainer.insertBefore(item, logContainer.firstChild);
+
+            // Giới hạn 20 log để không nặng DOM
+            if (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+
+            stLast.textContent = message;
+        }
+
+        // --- VÒNG LẶP CHÍNH (LOOP) ---
+        async function loop(timestamp) {
+            if (!isRunning) return;
+
+            // 1. Vẽ video lên canvas
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+            // 2. Tính FPS hiển thị
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                stFps.textContent = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+            }
+
+            // 3. Kiểm tra Throttle để gọi API
+            if (timestamp - lastTime > FRAME_INTERVAL) {
+                lastTime = timestamp;
+                
+                // Gửi frame xử lý (Async - không await để tránh chặn UI thread)
+                processFrame();
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        async function processFrame() {
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
+
+                // Gọi API Pipeline (Hàm bạn đã thêm vào api.js)
+                const result = await api.processPipeline(blob);
+
+                // Nếu có kết quả, vẽ đè lên canvas hiện tại
+                // Lưu ý: Có thể frame đã thay đổi, nhưng độ trễ thấp nên chấp nhận được
+                handleResult(result);
+
+            }, 'image/jpeg', 0.8); // Chất lượng 0.8 cho nhẹ
+        }
+
+        function handleResult(result) {
+            // Reset style vẽ
+            ctx.lineWidth = 3;
+            ctx.font = "18px Arial";
+
+            if (result.status === 'defect_found' && result.box) {
+                // Có lỗi + có box
+                const [x1, y1, x2, y2] = result.box;
+                
+                // Vẽ khung đỏ
+                ctx.strokeStyle = "red";
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                
+                // Vẽ nền chữ
+                ctx.fillStyle = "red";
+                ctx.fillRect(x1, y1 - 25, 150, 25);
+                
+                // Vẽ chữ
+                ctx.fillStyle = "white";
+                ctx.fillText(`${result.message}`, x1 + 5, y1 - 6);
+
+                // Cập nhật log bên phải
+                addLog(result.message, result.confidence, "red");
+                
+                objectCount++;
+                stObj.textContent = objectCount;
+            } 
+            else if (result.status === 'no_object') {
+                // Không có vật - Vẽ chữ vàng góc trái
+                ctx.fillStyle = "yellow";
+                ctx.fillText("Không phát hiện vật thể", 20, 30);
+            } 
+            else if (result.status === 'invalid_domain') {
+                // Sai domain - Vẽ chữ xám
+                ctx.fillStyle = "gray";
+                ctx.fillText("Ảnh không hợp lệ (Sai domain)", 20, 30);
+            }
+        }
     </script>
 </body>
 </html>

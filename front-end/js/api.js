@@ -132,6 +132,28 @@ class APIManager {
             throw error;
         }
     }
+
+    /**
+     * Gửi ảnh xử lý toàn bộ Pipeline (Validation -> YOLO -> SVM)
+     * Tối ưu cho Video Realtime
+     */
+    async processPipeline(fileOrBlob) {
+        try {
+            const formData = new FormData();
+            formData.append("file", fileOrBlob, `frame-${Date.now()}.jpg`);
+
+            const response = await fetch(`${this.baseURL}/process-pipeline`, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            return result; // Trả về JSON chứa status, box, message, confidence
+        } catch (error) {
+            console.error("Pipeline Error:", error);
+            return { status: "error", message: "Lỗi kết nối" };
+        }
+    }
 }
 
 // Export class for instantiation in main.js

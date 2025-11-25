@@ -103,59 +103,89 @@ document.addEventListener('DOMContentLoaded', async function() {
         camera.stopCamera();
     });
     
+    // === HÀM XỬ LÝ CHUNG CHO PIPELINE ===
+    async function runPipelineForIndex(index, blobData) {
+        // 1. Gọi API
+        const result = await api.processPipeline(blobData);
+        
+        // 2. Lấy metadata hiện tại để cập nhật
+        const meta = store.getMetadata(index);
+        
+        // 3. Xử lý kết quả trả về từ API
+        if (result.status === 'error') {
+            meta.production.result = "LỖI MẠNG";
+            meta.production.confidence = "N/A";
+        } 
+        else if (result.status === 'invalid_domain') {
+            meta.production.result = "SAI DOMAIN"; // Hoặc "Ảnh lạ"
+            meta.production.confidence = "N/A";
+        } 
+        else if (result.status === 'no_object') {
+            meta.production.result = "KHÔNG CÓ VẬT";
+            meta.production.confidence = "N/A";
+        } 
+        else if (result.status === 'defect_found') {
+            // Đây là trường hợp thành công: Có vật + Đã phân loại lỗi
+            meta.production.result = result.message.toUpperCase(); // VD: VẾT XƯỚC
+            meta.production.confidence = (result.confidence * 100).toFixed(1) + "%";
+            
+            // Nếu muốn lưu thêm xác suất chi tiết
+            if (result.probabilities) {
+                meta.production.probabilities = result.probabilities;
+            }
+            // Nếu muốn lưu bounding box (để vẽ sau này)
+            if (result.box) {
+                meta.production.box = result.box;
+            }
+        }
+
+        // 4. Lưu và vẽ lại UI
+        store.updateMetadata(index, meta);
+        ui.updateImageList();
+    }
+
     // Capture image handler
     captureBtn.addEventListener('click', async () => {
-        const captureResult = camera.captureImage(videoFeed, canvas);
-        if (!captureResult) return;
-        
-        const { imageData, width, height } = captureResult;
-        const captureTime = new Date();
-        
-        // Thêm ảnh vào store, ảnh mới nhất LUÔN LUÔN ở index cuối.
-        store.addImage(imageData); 
-        const index = store.getImageCount() - 1;
-        
-        // Generate metadata
-        const metadataObj = metadata.generateImageMetadata(
-            imageData,
-            index,
-            canvas,
-            cameraSelect,
-            camera.getCurrentStream()
-        );
-        metadataObj.captureTime = captureTime;
-        metadataObj.production = {
-            result: 'Đang kiểm tra...',
-            confidence: 'N/A'
+        try {
+            // 1. Chụp ảnh từ video
+            const captureResult = camera.captureImage(videoFeed, canvas);
+            if (!captureResult) return;
+            
+            const { imageData } = captureResult;
+            const captureTime = new Date();
+            
+            // 2. Lưu ảnh vào store (hiển thị lên UI ngay lập tức)
+            store.addImage(imageData); 
+            const index = store.getImageCount() - 1;
+            
+            // 3. Tạo metadata ban đầu (Trạng thái: Đang xử lý...)
+            const metadataObj = metadata.generateImageMetadata(
+                imageData, 
+                index, 
+                canvas, 
+                cameraSelect, 
+                camera.getCurrentStream()
+            );
+            metadataObj.captureTime = captureTime;
+            metadataObj.production = { result: 'Đang xử lý...', confidence: '...' };
+            
+            store.updateMetadata(index, metadataObj);
+            ui.updateImageList(); // Cập nhật UI để hiện "Đang xử lý..."
+            
+            // 4. CHUYỂN ĐỔI ẢNH VÀ GỌI PIPELINE
+            // Dùng hàm dataURItoBlob thay vì fetch (Tránh lỗi treo)
+            const blob = dataURItoBlob(imageData);
+
+            console.log("Đã tạo Blob từ ảnh chụp, đang gửi API..."); // Debug log
+
+            // Gọi hàm Pipeline chung (đã viết ở bước trước)
+            await runPipelineForIndex(index, blob);
+
+        } catch (err) {
+            console.error("Lỗi nghiêm trọng khi chụp ảnh:", err);
+            // Nếu có lỗi, cập nhật UI để người dùng biết
+            alert("Có lỗi xảy ra khi xử lý ảnh chụp. Xem console để biết chi tiết.");
         }
-        store.updateMetadata(index, metadataObj); // Cập nhật metadata cho index 0
-        
-        // Update UI
-        ui.updateImageList();
-        
-        // Send to API
-        (async () => {
-            try {
-                // Chuyển dataURL (imageData) thành Blob để gửi đi
-                // (Hàm sendImageForValidation cần 1 Blob, không phải dataURL)
-                const base64Response = await fetch(imageData);
-                const blob = await base64Response.blob();
-
-                // Gửi đi kiểm tra
-                const validationResult = await api.sendImageForValidation(blob, index);
-
-                ui.updateImageList();
-
-                // CHỈ PHÂN LOẠI NẾU "ĐẠT"
-                if (validationResult.hop_le === true) {
-                    api.sendImageForClassification(imageData, index) // Gửi đi phân loại cho index 0
-                    ui.updateImageList(); // Vẽ lại UI với kết quả API
-                    }
-            } catch(err) {
-                console.error('API error:', err);
-                ui.updateImageList(); // Vẽ lại UI nếu có lỗi
-            };
-        })();
     });
     
     // Clear all images handler
@@ -172,59 +202,32 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Xử lý khi người dùng đã chọn file
     fileUploadInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        if (!file) return; // Người dùng hủy chọn file
+        if (!file) return;
         
         const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const imageData = e.target.result; // Đây là dataURL
+        reader.onload = async (e) => {
+            const imageData = e.target.result;
             const captureTime = new Date();
 
-            // Thêm ảnh vào store (store sẽ unshift), ảnh mới nhất LUÔN LUÔN ở index 0.
             store.addImage(imageData);
             const index = store.getImageCount() - 1;
 
-            // 2. Tạo metadata rút gọn cho file upload
             const metadataObj = {
                 captureTime: captureTime,
-                basic: {
-                    resolution: 'N/A (uploaded)',
-                    fileSize: `${(file.size / 1024).toFixed(1)} KB`,
-                    format: file.type,
-                },
+                basic: { resolution: 'Upload', fileSize: `${(file.size/1024).toFixed(1)} KB`, format: file.type },
                 camera: { cameraId: 'Uploaded File' },
                 environment: { timestamp: captureTime.toLocaleString('vi-VN') },
                 system: {},
-                production: {
-                    result: 'Đang kiểm tra...', // Trạng thái ban đầu
-                    confidence: 'N/A'
-                }
+                production: { result: 'Đang xử lý...', confidence: '...' }
             };
-            store.updateMetadata(index, metadataObj); // Cập nhật metadata cho index 0
-
-            // 3. Cập nhật UI (để hiển thị ảnh với badge "Đang kiểm tra...")
+            store.updateMetadata(index, metadataObj);
             ui.updateImageList();
 
-            // 4. GỌI API KIỂM TRA (Bước 1 của "Lựa chọn 2")
-            // Gửi 'file' (File object) đi, không phải dataURL
-            api.sendImageForValidation(file, index) // Gửi đi kiểm tra cho index 0
-                .then((result) => {
-                    // 5. Cập nhật UI lần nữa với kết quả
-                    console.log("Validation result:", result.thong_bao);
-                    ui.updateImageList();
-                })
-                .catch(err => {
-                    // Lỗi đã được xử lý trong api.js (cập nhật store)
-                    console.error('Validation API error:', err);
-                    ui.updateImageList(); // Vẽ lại UI nếu có lỗi
-                });
+            // Chạy Pipeline với file upload trực tiếp
+            await runPipelineForIndex(index, file);
         };
-        
-        // Bắt đầu đọc file
         reader.readAsDataURL(file);
-
-        // Reset input file để người dùng có thể upload lại file đó
-        fileUploadInput.value = '';
+        fileUploadInput.value = ''; // Reset input
     });
     
     // Close modal handler
@@ -261,13 +264,44 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.warn("Chức năng download chưa được liên kết.");
         }
     });
+
+    // --- HÀM BỔ TRỢ: CHUYỂN DATAURL -> BLOB (Fix lỗi treo feature chụp ảnh) ---
+    function dataURItoBlob(dataURI) {
+        // Tách phần header (vd: data:image/jpeg;base64,) và phần dữ liệu
+        var byteString = atob(dataURI.split(',')[1]);
+        var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        
+        return new Blob([ab], {type: mimeString});
+    }
     
     // Check browser support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        ui.showError('Trình duyệt của bạn không hỗ trợ truy cập camera');
+        ui.showError('Trình duyệt không hỗ trợ camera');
         startCameraBtn.disabled = true;
     }
+    await loadCameras();
     
+    // Helper loadCameras (để đảm bảo code chạy)
+    async function loadCameras() {
+        try {
+            const videoDevices = await camera.getCameras();
+            cameraSelect.innerHTML = '<option value="">Chọn camera</option>';
+            videoDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${cameraSelect.options.length}`;
+                cameraSelect.appendChild(option);
+            });
+        } catch(e) { console.error(e); }
+    }
+
     // Initial UI state
     updateUI();
 });
