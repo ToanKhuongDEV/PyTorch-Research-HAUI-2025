@@ -112,6 +112,10 @@ def train_cnn(model, dataloader, num_epochs):
             outputs = model(images)
             loss = criterion(outputs, labels)
 
+            # --- Thêm L1 regularization cho lớp fc ---
+            l1_loss = torch.sum(torch.abs(model.fc.weight))
+            loss += 0.005 * l1_loss
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
