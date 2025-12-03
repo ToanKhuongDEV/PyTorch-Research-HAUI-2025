@@ -1,9 +1,10 @@
 fastapi
 uvicorn[standard]
+python-multipart
 torch
 torchvision
-pillow
+ultralytics
+numpy
 scikit-learn
 joblib
-numpy
-tqdm
+Pillow
