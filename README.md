@@ -2,134 +2,146 @@
 
 (Industrial Metal Surface Defect Detection System)
 
-## 🎯 Tổng quan
+Hệ thống tích hợp trí tuệ nhân tạo để phát hiện, nhận diện và phân loại các khuyết tật trên bề mặt kim loại trong thời gian thực. Dự án sử dụng mô hình lai (Hybrid AI Pipeline) kết hợp giữa Deep Learning và Machine Learning truyền thống.
 
-Đây là một hệ thống machine learning hoàn chỉnh để phát hiện các khuyết tật trên bề mặt kim loại. Dự án sử dụng cách tiếp cận "lai" (hybrid):
+-----
 
-  * **Deep Learning (PyTorch)**: Sử dụng kiến trúc ResNet tùy chỉnh để trích xuất đặc trưng (feature extraction).
-  * **Machine Learning Cổ điển**: Sử dụng bộ phân loại SVM để phân loại khuyết tật từ các đặc trưng đã trích xuất.
-  * **Web Interface**: Giao diện web (HTML/JS) cung cấp khả năng xử lý camera thời gian thực và trực quan hóa khuyết tật.
-  * **API Backend**: Một REST API sử dụng FastAPI để phục vụ mô hình (model inference).
+## 🚀 Tính Năng Nổi Bật
 
-## 🏗️ Kiến trúc hệ thống
+1.  Pipeline AI Đa Tầng "All-in-One":
+       Validation: Loại bỏ ảnh không hợp lệ/sai domain (ResNet50 + Cosine Similarity).
+       Detection: Phát hiện vị trí vật thể (YOLOv8).
+       Classification: Phân loại chi tiết lỗi (ResNet + SVM).
+2.  Video Realtime: Xử lý luồng video trực tiếp, vẽ khung cảnh báo lỗi ngay lập tức (FPS tối ưu).
+3.  Chụp & Upload Ảnh: Kiểm tra kỹ lưỡng từng ảnh tĩnh.
+4.  Dashboard: Thống kê và nhật ký phát hiện theo thời gian thực.
 
-Kiến trúc tổng thể bao gồm 3 thành phần chính giao tiếp với nhau:
+-----
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API   │    │   ML Pipeline   │
-│   (HTML/JS)     │◄──►│   (FastAPI)     │◄──►│   (PyTorch)     │
-│                 │    │                 │    │                 │
-│ • Camera Feed   │    │ • /predict      │    │ • ResNet CNN    │
-│ • Image Capture │    │ • /kiem-tra-anh │    │ • SVM Classifier│
-│ • Dashboard     │    │ • Model Serving │    │ • Feature Ext.  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+## 🛠️ Yêu Cầu Hệ Thống
 
-## 📁 Cấu trúc thư mục
+   Python: Phiên bản 3.8 trở lên.
+   Editor: VS Code (Khuyên dùng để chạy Frontend).
+   Extension VS Code: "Live Server" (Bắt buộc để chạy Frontend không bị lỗi CORS).
+   Phần cứng: Webcam (cho Realtime), GPU NVIDIA (Khuyến nghị để xử lý nhanh hơn).
 
-Dự án được chia thành 3 thư mục chính:
+-----
 
-```
-PyTorch-Research-HAUI-2025/
-├── front-end/                # Giao diện web
-│   ├── css/                  # Toàn bộ file CSS
-│   ├── js/                   # Toàn bộ code JavaScript (đã refactor)
-│   │   ├── main.js           # File chính: Khởi tạo và điều phối
-│   │   ├── store.js          # Quản lý state (ảnh, metadata, trang)
-│   │   ├── camera.js         # Quản lý stream camera
-│   │   ├── api.js            # Gọi API (predict, kiem-tra-anh)
-│   │   ├── ui.js             # Cập nhật giao diện (list ảnh, lỗi)
-│   │   ├── modal.js          # Quản lý modal xem chi tiết ảnh
-│   │   ├── metadata.js       # Tính toán metadata cho ảnh
-│   │   └── utils.js          # Các hàm tiện ích chung
-│   ├── photo.html            # Giao diện chụp ảnh
-│   └── video.html            # Giao diện video thời gian thực
-│
-├── main-model/               # Code huấn luyện ML
-│   ├── Resnet_SVM.py         # Code huấn luyện mô hình ResNet + SVM
-│   └── ...
-│
-├── transferAPI/              # Backend API
-│   ├── app.py                # File FastAPI chính (khởi động server)
-│   ├── model_def.py          # Định nghĩa kiến trúc model
-│   ├── extract_vector.py     # Script tạo vector chuẩn (cho validation)
-│   ├── requirements.txt      # Các thư viện Python cần thiết
-│   └── saved/                # Các file model đã huấn luyện
-│       ├── resnet_weights.pth
-│       ├── svm_model.pkl
-│       ├── vector_trung_binh.npy
-│       └── ...
-│
-└── README.md                 # File này
-```
+## 📝 Hướng Dẫn Cài Đặt (Từ Đầu Đến Cuối)
 
-## 🚀 Cách chạy dự án
+### Bước 1: Cài đặt Môi trường Backend
 
-### 1\. Cài đặt Python
+Mở terminal tại thư mục gốc của dự án:
 
-Đi tới thư mục `transferAPI` và cài đặt các thư viện cần thiết:
+1.  Di chuyển vào thư mục API:
 
-```bash
-cd transferAPI
-pip install -r requirements.txt
-```
+    ```bash
+    cd transferAPI
+    ```
 
-### 2\. Chuẩn bị Mô hình Validation
+2.  Cài đặt các thư viện cần thiết:
 
-(Chỉ cần chạy 1 lần đầu tiên)
-Chạy script này để tạo file vector trung bình và ngưỡng cho chức năng "Kiểm tra ảnh":
+    ```bash
+    pip install -r requirements.txt
+    pip install ultralytics  # Cài thêm thư viện YOLO
+    ```
 
-```bash
-cd transferAPI
-python extract_vector.py
-```
+### Bước 2: Chuẩn bị Model và Dữ liệu
 
-### 3\. Khởi động Backend API
+Đảm bảo thư mục `transferAPI/saved/` có đủ các file model sau (nếu thiếu phải copy vào):
 
-Vẫn ở trong thư mục `transferAPI`, khởi động server FastAPI:
+   `yolo.pt` (hoặc model YOLO custom của bạn).
+   `resnet_weights.pth` (Trọng số ResNet train cho SVM).
+   `svm_model.pkl` (Model SVM).
+   `scaler.pkl` & `classes.npy`.
+
+### Bước 3: Tạo Dữ Liệu Validation (QUAN TRỌNG)
+
+Bạn bắt buộc phải chạy bước này 1 lần đầu tiên để hệ thống học được "thế nào là ảnh chuẩn".
+
+1.  Mở file `transferAPI/extract_vector.py`.
+2.  Tìm dòng `THU_MUC_ANH_CHUAN = "..."` và sửa đường dẫn trỏ đến thư mục chứa các ảnh mẫu (ảnh sạch, không lỗi) trên máy bạn.
+3.  Chạy script:
+    ```bash
+    python extract_vector.py
+    ```
+    Thành công khi thấy thông báo: "Đã lưu vector trung bình..."
+
+-----
+
+## ▶️ Hướng Dẫn Chạy Hệ Thống
+
+Bạn cần mở 2 terminal (hoặc 2 cửa sổ): 1 cái chạy Backend, 1 cái chạy Frontend.
+
+### 1\. Khởi động Backend (Server)
+
+Tại terminal (đang ở thư mục `transferAPI`), chạy lệnh:
 
 ```bash
 python -m uvicorn app:app --reload --port 8000
 ```
 
-Server sẽ chạy tại `http://localhost:8000`.
+   Chờ đến khi thấy thông báo: `--- SERVER SẴN SÀNG ---` và `Uvicorn running on http://127.0.0.1:8000`.
+   Lưu ý: Không tắt cửa sổ này.
 
-### 4\. Khởi động Frontend
+### 2\. Khởi động Frontend (Giao diện)
 
-Mở file `front-end/photo.html` trong trình duyệt của bạn (khuyến khích sử dụng "Live Server" trong VS Code để tránh lỗi CORS).
+Tuyệt đối không mở trực tiếp file HTML (double click). Bạn phải dùng Live Server để tránh lỗi chặn Camera và lỗi CORS.
 
-## 🔌 Tài liệu API
+1.  Mở VS Code tại thư mục gốc dự án.
+2.  Mở file `front-end/video.html` (hoặc `photo.html`).
+3.  Nhấn chuột phải vào vùng code -\> Chọn "Open with Live Server".
+4.  Trình duyệt sẽ tự bật trang web (thường là `http://127.0.0.1:5500/front-end/video.html`).
 
-Hệ thống cung cấp 2 API chính tại `http://localhost:8000`.
+-----
 
-### 1\. POST `/kiem-tra-anh`
+## 📖 Hướng Dẫn Sử Dụng
 
-Kiểm tra xem ảnh có "đạt chuẩn" (giống ảnh mẫu) hay không.
+### Chế độ Video Realtime (`video.html`)
 
-  * **Request**: `multipart/form-data` với một file ảnh (key là `image_file`).
-  * **Response (JSON)**:
-    ```json
-    {
-      "hop_le": true,
-      "thong_bao": "Ảnh đạt chuẩn"
-    }
-    ```
+1.  Chọn Camera từ danh sách thả xuống (nếu máy có nhiều cam).
+2.  Nhấn "Bắt đầu".
+3.  Đưa vật thể vào trước camera.
+       Nếu có lỗi: Khung đỏ hiện lên kèm tên lỗi.
+       Nếu không có vật: Hiện chữ vàng "Không phát hiện vật thể".
+       Nếu ảnh lạ: Hiện chữ xám "Sai domain".
+4.  Xem ảnh đang xử lý ở cột bên phải và nhật ký lỗi bên dưới.
 
-### 2\. POST `/predict`
+### Chế độ Chụp Ảnh (`photo.html`)
 
-Phân loại khuyết tật trên ảnh (chỉ nên gọi sau khi ảnh đã "đạt chuẩn").
+1.  Nhấn nút "Bật Camera".
+2.  Nhấn "Chụp Ảnh".
+3.  Hệ thống sẽ gửi ảnh lên server, chạy qua Pipeline và trả về kết quả chi tiết trong Modal.
+4.  Hoặc nhấn "Upload Ảnh" để chọn file từ máy tính.
 
-  * **Request**: `multipart/form-data` với một file ảnh (key là `file`).
-  * **Response (JSON)**:
-    ```json
-    {
-      "class": "scratch",
-      "confidence": 0.95,
-      "probabilities": {
-        "scratch": 0.95,
-        "surface_hole": 0.03,
-        "deformation": 0.02
-      }
-    }
-    ```
+-----
+
+## 📁 Cấu Trúc Thư Mục Dự Án
+
+```
+PyTorch-Research-HAUI-2025/
+├── front-end/                # GIAO DIỆN NGƯỜI DÙNG
+│   ├── css/                  # (style.css, components/...)
+│   ├── js/                   # MÃ NGUỒN FRONTEND
+│   │   ├── api.js            # Gọi API (/process-pipeline)
+│   │   ├── camera.js         # Xử lý Webcam
+│   │   ├── main.js           # Logic trang Chụp ảnh
+│   │   ├── store.js          # Quản lý dữ liệu
+│   │   ├── ui.js             # Vẽ giao diện
+│   │   └── ...
+│   ├── photo.html            # Trang Chụp ảnh/Upload
+│   └── video.html            # Trang Video Realtime
+│
+├── transferAPI/              # BACKEND SERVER
+│   ├── app.py                # File chính chạy Server (Pipeline Logic)
+│   ├── model_def.py          # Định nghĩa mạng ResNet
+│   ├── extract_vector.py     # Script tạo dữ liệu Validation
+│   ├── requirements.txt      # Danh sách thư viện
+│   └── saved/                # KHO CHỨA MODEL
+│       ├── yolo.pt           # Model YOLO
+│       ├── resnet_weights.pth
+│       ├── vector_trung_binh.npy
+│       └── ...
+│
+└── README.md                 # Hướng dẫn sử dụng
+```

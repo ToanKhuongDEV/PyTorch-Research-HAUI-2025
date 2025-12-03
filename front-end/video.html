@@ -79,6 +79,9 @@
                 </div>
                 <div class="card-content">
                     <div class="camera-controls">
+                        <select class="select" id="cameraSelect">
+                            <option value="">Chọn camera</option>
+                        </select>
                         <button class="btn btn-default" id="start-video">
                             <i class="fas fa-play"></i> Bắt đầu
                         </button>
@@ -100,6 +103,19 @@
         </div>
         
         <div class="right-column">
+
+            <div class="card" style="flex: 0 0 auto; margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-camera-retro"></i> Ảnh Đang Xử Lý</h2>
+                </div>
+                <div class="card-content" style="padding: 10px; display: flex; justify-content: center; align-items: center; background: #f8f9fa; min-height: 150px;">
+                    <canvas id="snapshot-preview" style="max-width: 100%; height: auto; max-height: 200px; border: 1px solid #ddd;"></canvas>
+                    <div id="current-result-text" style="margin-top: 10px; font-weight: 600; font-size: 16px; text-align: center; width: 100%; padding: 5px; border-radius: 4px; background: white; border: 1px solid #eee;">
+                        ---
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-clipboard-list"></i> Nhật Ký Phát Hiện</h2>
@@ -119,17 +135,20 @@
 
     <script src="js/store.js"></script> <script src="js/api.js"></script>   <script>
         // --- CẤU HÌNH ---
-        const FPS_TARGET = 5; // Giới hạn gửi 5 request/giây để server không bị quá tải
+        const FPS_TARGET = 5; 
         const FRAME_INTERVAL = 1000 / FPS_TARGET;
 
         // --- DOM ELEMENTS ---
+        const cameraSelect = document.getElementById('cameraSelect'); // [MỚI]
         const startBtn = document.getElementById('start-video');
         const stopBtn = document.getElementById('stop-video');
         const displayDiv = document.getElementById('video-display');
         const placeholder = document.getElementById('placeholder');
         const logContainer = document.getElementById('log-container');
         
-        // Status Elements
+        const previewCanvas = document.getElementById('snapshot-preview');
+        const previewCtx = previewCanvas.getContext('2d');
+        
         const stCam = document.getElementById('status-cam');
         const stFps = document.getElementById('status-fps');
         const stObj = document.getElementById('status-objects');
@@ -140,7 +159,7 @@
         videoElement.autoplay = true;
         videoElement.playsInline = true;
         
-        let canvas = document.createElement('canvas');
+        let canvas = document.createElement('canvas'); 
         canvas.style.width = "100%";
         canvas.style.height = "100%";
         canvas.style.objectFit = "contain";
@@ -153,29 +172,72 @@
         let lastFpsTime = 0;
         let objectCount = 0;
         
-        // Init API (Mock store null vì video mode ko dùng store)
         const api = new APIManager({ getMetadata: () => {}, updateMetadata: () => {} });
 
-        // --- HÀM KHỞI ĐỘNG ---
+        // --- [MỚI] HÀM LOAD DANH SÁCH CAMERA ---
+        async function loadCameras() {
+            try {
+                // Xin quyền trước để lấy được tên thiết bị (Label)
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                cameraSelect.innerHTML = '';
+                
+                if (videoDevices.length === 0) {
+                    const option = document.createElement('option');
+                    option.text = "Không tìm thấy camera";
+                    cameraSelect.appendChild(option);
+                    return;
+                }
+
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Lỗi load camera:", err);
+                cameraSelect.innerHTML = '<option value="">Lỗi quyền truy cập</option>';
+            }
+        }
+
+        // Gọi load camera ngay khi trang tải xong
+        document.addEventListener('DOMContentLoaded', loadCameras);
+
+        // --- HÀM KHỞI ĐỘNG (CẬP NHẬT) ---
         startBtn.addEventListener('click', async () => {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 640, height: 480, frameRate: { ideal: 15 } } 
-                });
+                // [MỚI] Lấy ID camera đang chọn
+                const selectedDeviceId = cameraSelect.value;
+                const constraints = {
+                    video: {
+                        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+                        width: { ideal: 640 }, // Ưu tiên độ phân giải này
+                        height: { ideal: 480 },
+                        frameRate: { ideal: 15 }
+                    }
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
                 
                 videoElement.srcObject = stream;
-                // Đợi video load metadata để set kích thước canvas
                 videoElement.onloadedmetadata = () => {
                     canvas.width = videoElement.videoWidth;
                     canvas.height = videoElement.videoHeight;
-                    
-                    // Xóa placeholder, thêm canvas
-                    placeholder.classList.add('hidden'); // Dùng class hidden của utilities.css
+                    previewCanvas.width = videoElement.videoWidth;
+                    previewCanvas.height = videoElement.videoHeight;
+
+                    placeholder.classList.add('hidden');
                     if (!displayDiv.contains(canvas)) {
                         displayDiv.appendChild(canvas);
                     }
                     
                     isRunning = true;
+                    // Disable select khi đang chạy
+                    cameraSelect.disabled = true; 
                     updateStatusUI(true);
                     loop(0);
                 };
@@ -184,7 +246,7 @@
             }
         });
 
-        // --- HÀM DỪNG ---
+        // --- HÀM DỪNG (CẬP NHẬT) ---
         stopBtn.addEventListener('click', () => {
             isRunning = false;
             if (stream) {
@@ -194,19 +256,23 @@
             if (displayDiv.contains(canvas)) {
                 displayDiv.removeChild(canvas);
             }
+            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // Enable lại select
+            cameraSelect.disabled = false;
             updateStatusUI(false);
         });
 
-        // --- UI UTILS ---
+        // --- UI UTILS & LOGIC KHÁC (GIỮ NGUYÊN) ---
         function updateStatusUI(active) {
             if (active) {
                 stCam.textContent = "Đang chạy";
-                stCam.style.color = "#10b981"; // Green
+                stCam.style.color = "#10b981";
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
             } else {
                 stCam.textContent = "Đang tắt";
-                stCam.style.color = "#e74c3c"; // Red
+                stCam.style.color = "#e74c3c";
                 stFps.textContent = "0";
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
@@ -221,12 +287,10 @@
         }
 
         function addLog(message, conf, colorClass) {
-            // Xóa empty state nếu có
             const emptyState = logContainer.querySelector('.empty-state');
             if (emptyState) emptyState.remove();
 
             const item = document.createElement('div');
-            // Style inline nhanh hoặc dùng class defect-item từ cards.css
             item.className = 'defect-item'; 
             item.style.marginBottom = '10px';
             item.style.padding = '10px';
@@ -244,10 +308,8 @@
                 <div style="font-size: 13px; margin-top: 4px;">Độ tin cậy: ${(conf*100).toFixed(1)}%</div>
             `;
 
-            // Thêm vào đầu danh sách
             logContainer.insertBefore(item, logContainer.firstChild);
 
-            // Giới hạn 20 log để không nặng DOM
             if (logContainer.children.length > 20) {
                 logContainer.removeChild(logContainer.lastChild);
             }
@@ -255,14 +317,10 @@
             stLast.textContent = message;
         }
 
-        // --- VÒNG LẶP CHÍNH (LOOP) ---
         async function loop(timestamp) {
             if (!isRunning) return;
-
-            // 1. Vẽ video lên canvas
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-            // 2. Tính FPS hiển thị
             frameCount++;
             if (timestamp - lastFpsTime >= 1000) {
                 stFps.textContent = frameCount;
@@ -270,67 +328,59 @@
                 lastFpsTime = timestamp;
             }
 
-            // 3. Kiểm tra Throttle để gọi API
             if (timestamp - lastTime > FRAME_INTERVAL) {
                 lastTime = timestamp;
-                
-                // Gửi frame xử lý (Async - không await để tránh chặn UI thread)
                 processFrame();
             }
-
             requestAnimationFrame(loop);
         }
 
         async function processFrame() {
+            previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
             canvas.toBlob(async (blob) => {
                 if (!blob) return;
-
-                // Gọi API Pipeline (Hàm bạn đã thêm vào api.js)
                 const result = await api.processPipeline(blob);
-
-                // Nếu có kết quả, vẽ đè lên canvas hiện tại
-                // Lưu ý: Có thể frame đã thay đổi, nhưng độ trễ thấp nên chấp nhận được
                 handleResult(result);
-
-            }, 'image/jpeg', 0.8); // Chất lượng 0.8 cho nhẹ
+            }, 'image/jpeg', 0.8);
         }
 
         function handleResult(result) {
-            // Reset style vẽ
             ctx.lineWidth = 3;
             ctx.font = "18px Arial";
+            const resultText = document.getElementById("current-result-text");
 
             if (result.status === 'defect_found' && result.box) {
-                // Có lỗi + có box
                 const [x1, y1, x2, y2] = result.box;
-                
-                // Vẽ khung đỏ
                 ctx.strokeStyle = "red";
                 ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                
-                // Vẽ nền chữ
                 ctx.fillStyle = "red";
                 ctx.fillRect(x1, y1 - 25, 150, 25);
-                
-                // Vẽ chữ
                 ctx.fillStyle = "white";
                 ctx.fillText(`${result.message}`, x1 + 5, y1 - 6);
 
-                // Cập nhật log bên phải
+                // Cập nhật text dưới ảnh preview
+                resultText.textContent = `⚠️ PHÁT HIỆN: ${result.message} (${(result.confidence * 100).toFixed(0)}%)`;
+                resultText.style.color = "#10b981"; // Đỏ
+
                 addLog(result.message, result.confidence, "red");
-                
                 objectCount++;
                 stObj.textContent = objectCount;
             } 
             else if (result.status === 'no_object') {
-                // Không có vật - Vẽ chữ vàng góc trái
                 ctx.fillStyle = "yellow";
                 ctx.fillText("Không phát hiện vật thể", 20, 30);
+                
+                // Cập nhật text dưới ảnh preview
+                resultText.textContent = "Không có vật thể";
+                resultText.style.color = "#95a5a6";
             } 
             else if (result.status === 'invalid_domain') {
-                // Sai domain - Vẽ chữ xám
                 ctx.fillStyle = "gray";
                 ctx.fillText("Ảnh không hợp lệ (Sai domain)", 20, 30);
+                
+                // Cập nhật text dưới ảnh preview
+                resultText.textContent = "Ảnh khác lạ (Sai domain)";
+                resultText.style.color = "#e74c3c";
             }
         }
     </script>

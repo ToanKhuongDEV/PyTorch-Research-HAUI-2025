@@ -150,7 +150,7 @@ def train_and_test_svm(X_train, y_train, X_test, y_test):
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    svm = SVC(kernel='linear', C=1.0)
+    svm = SVC(kernel='linear', C=155)
 
     # Thời gian train SVM
     train_start = time.time()
