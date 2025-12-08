@@ -1,95 +1,95 @@
-# transferAPI/extract_vector.py
 import os
 import glob
+import time
 import torch
 import torchvision.models as models
 import torchvision.transforms as transforms
-from PIL import Image
 import numpy as np
+from PIL import Image
+
+# --- THƯ VIỆN MỚI ---
+from sklearn.decomposition import PCA
+from sklearn.ensemble import IsolationForest
+import joblib
 
 # --- CẤU HÌNH ---
-# 1. CHỈNH SỬA ĐƯỜNG DẪN NÀY
-#    Đây là thư mục chứa N ảnh "chuẩn" (ảnh OK) của bạn.
-THU_MUC_ANH_CHUAN = "E:/University/NCKH/Dataset/Dataset/200_Free" 
-
-# 2. Nơi lưu file "chuẩn" (Đã khớp với cấu trúc thư mục của bạn)
+THU_MUC_ANH_CHUAN = "D:/DATASET/Data/INDOMAIN"  # Chỉ chứa ảnh Kim loại chuẩn
 SAVE_DIR = "transferAPI/saved"
-FILE_VECTOR_TRUNG_BINH = os.path.join(SAVE_DIR, "vector_trung_binh.npy")
-FILE_NGUONG_KHOANG_CACH = os.path.join(SAVE_DIR, "nguong_khoang_cach.txt")
-# --- KẾT THÚC CẤU HÌNH ---
+FILE_MODEL_OOD = os.path.join(SAVE_DIR, "ood_pipeline.pkl")
 
-# Đảm bảo thư mục "saved" tồn tại
-os.makedirs(SAVE_DIR, exist_ok=True)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 1. Định nghĩa hàm tiền xử lý (PHẢI GIỐNG HỆT TRONG app.py kiểm tra)
-tien_xu_ly = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
 
-# 2. Tải model ResNet50 (PHẢI GIỐNG HỆT TRONG app.py kiểm tra)
-print("Đang tải mô hình ResNet50...")
-model = models.resnet50(weights='IMAGENET1K_V1')
-model = torch.nn.Sequential(*list(model.children())[:-1]) # Bỏ lớp cuối
-model.eval() # Chuyển sang chế độ đánh giá
-print("Tải mô hình thành công.")
+def main():
+    os.makedirs(SAVE_DIR, exist_ok=True)
 
-def trich_xuat_vector(image_path):
-    """Hàm trích xuất vector đặc trưng từ một ảnh."""
-    try:
-        img = Image.open(image_path).convert('RGB')
-        img_t = tien_xu_ly(img)
-        batch_t = torch.unsqueeze(img_t, 0) # Tạo batch
-        
-        with torch.no_grad(): # Không cần tính gradient
-            vector = model(batch_t)
-            
-        return vector.flatten() # Làm phẳng vector
-    except Exception as e:
-        print(f"Lỗi khi xử lý ảnh {image_path}: {e}")
-        return None
+    # 1. Tiền xử lý
+    tien_xu_ly = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
-# 3. Trích xuất vector từ N ảnh chuẩn
-print(f"Đang đọc ảnh từ: {THU_MUC_ANH_CHUAN}")
-cac_vector = []
-# Tìm tất cả các file ảnh (jpg, png)
-image_paths = glob.glob(os.path.join(THU_MUC_ANH_CHUAN, "*.jpg")) + \
-              glob.glob(os.path.join(THU_MUC_ANH_CHUAN, "*.png"))
+    # 2. ResNet50
+    print("Đang tải mô hình ResNet50...")
+    model = models.resnet50(weights='IMAGENET1K_V1')
+    model = torch.nn.Sequential(*list(model.children())[:-1])
+    model.to(DEVICE)
+    model.eval()
 
-if not image_paths:
-    print(f"!!! LỖI: Không tìm thấy ảnh nào trong '{THU_MUC_ANH_CHUAN}'.")
-    print("Vui lòng kiểm tra lại đường dẫn CẤU HÌNH 1.")
-else:
-    print(f"Tìm thấy {len(image_paths)} ảnh. Bắt đầu trích xuất vector...")
-    for path in image_paths:
-        vec = trich_xuat_vector(path)
-        if vec is not None:
-            cac_vector.append(vec)
+    # 3. Đọc ảnh
+    print(f"Đang đọc ảnh từ: {THU_MUC_ANH_CHUAN}")
+    image_paths = glob.glob(os.path.join(THU_MUC_ANH_CHUAN, "*.jpg")) + \
+                  glob.glob(os.path.join(THU_MUC_ANH_CHUAN, "*.png"))
 
-    if not cac_vector:
-        print("!!! LỖI: Không thể trích xuất vector từ bất kỳ ảnh nào.")
-    else:
-        # Chuyển list các tensor thành 1 tensor 2D
-        ma_tran_vector = torch.stack(cac_vector)
-        print(f"Kích thước ma trận vector: {ma_tran_vector.shape}") # (n_images, 2048)
-        
-        # 4. Tính vector trung bình
-        vector_trung_binh = torch.mean(ma_tran_vector, dim=0)
-        print(f"Kích thước vector trung bình: {vector_trung_binh.shape}") # (2048)
-        
-        # 5. Tính khoảng cách lớn nhất (ngưỡng)
-        khoang_cach = [torch.dist(v, vector_trung_binh) for v in cac_vector]
-        nguong_khoang_cach = max(khoang_cach).item()
-        
-        print(f"Khoảng cách lớn nhất (ngưỡng): {nguong_khoang_cach}")
-        
-        # 6. Lưu file
-        np.save(FILE_VECTOR_TRUNG_BINH, vector_trung_binh.numpy())
-        with open(FILE_NGUONG_KHOANG_CACH, 'w') as f:
-            f.write(str(nguong_khoang_cach))
-            
-        print("--- THÀNH CÔNG ---")
-        print(f"Đã lưu vector trung bình tại: {FILE_VECTOR_TRUNG_BINH}")
-        print(f"Đã lưu ngưỡng khoảng cách tại: {FILE_NGUONG_KHOANG_CACH}")
+    if len(image_paths) == 0:
+        print("!!! LỖI: Không có ảnh training.")
+        return
+
+    print(f"Tìm thấy {len(image_paths)} ảnh chuẩn. Bắt đầu xử lý...")
+
+    raw_vectors = []
+    with torch.no_grad():
+        for i, path in enumerate(image_paths):
+            try:
+                img = Image.open(path).convert('RGB')
+                img_t = tien_xu_ly(img)
+                batch_t = torch.unsqueeze(img_t, 0).to(DEVICE)
+
+                vector = model(batch_t).flatten()
+                raw_vectors.append(vector.cpu().numpy())
+            except Exception as e:
+                print(f"Lỗi ảnh {path}: {e}")
+
+    # 4. Huấn luyện Isolation Forest
+    print("\n--- BẮT ĐẦU HUẤN LUYỆN (Isolation Forest) ---")
+
+    X_train = np.array(raw_vectors)
+
+    # A. PCA: Nén chặt xuống  chiều
+    print("1. Đang chạy PCA (nén xuống 64 chiều)...")
+    pca = PCA(n_components=44, random_state=42)
+    X_pca = pca.fit_transform(X_train)
+
+    # B. Isolation Forest
+    print("2. Đang xây dựng Rừng cô lập (Isolation Forest)...")
+    ood_model = IsolationForest(n_estimators=100,
+                                contamination=0.012,
+                                random_state=42,
+                                n_jobs=-1)
+    ood_model.fit(X_pca)
+
+    # 5. Lưu Pipeline
+    pipeline = {
+        "pca": pca,
+        "ood_model": ood_model,
+        "type": "IsolationForest"
+    }
+
+    joblib.dump(pipeline, FILE_MODEL_OOD)
+    print("\n--- HOÀN THÀNH ---")
+    print(f"Đã lưu model mới (chặt chẽ hơn) tại: {FILE_MODEL_OOD}")
+
+
+if __name__ == "__main__":
+    main()
