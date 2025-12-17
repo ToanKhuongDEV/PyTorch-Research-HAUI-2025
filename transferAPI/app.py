@@ -4,6 +4,9 @@ import os
 import numpy as np
 import joblib
 from PIL import Image, ImageDraw
+from datetime import datetime, timedelta
+import random
+import time
 
 import torch
 import torchvision.models as models
@@ -152,83 +155,158 @@ def get_svm_prediction(img):
     pred_idx = int(np.argmax(probs))
     return classes[pred_idx], float(probs[pred_idx])
 
-# --- ENDPOINT TỐI ƯU CHO REALTIME ---
+# --- BIẾN TOÀN CỤC MỚI CHO TRACKING ---
+track_history = {} # Lưu vết di chuyển (nếu cần vẽ đường đi)
+counted_ids = set() # Lưu các ID duy nhất đã đếm được
+
+@app.post("/reset-count")
+async def reset_count():
+    """Reset bộ đếm khi bắt đầu phiên mới"""
+    global counted_ids
+    counted_ids = set()
+    return {"status": "ok", "message": "Đã reset bộ đếm"}
+
+
+# --- HÀM TẠO DỮ LIỆU GIẢ (MOCK DATA) ---
+def generate_mock_data():
+    data = []
+    defect_types = ["Vết xước", "Vết lõm", "Rỉ sét", "Nứt bề mặt", "Biến dạng"]
+    
+    # Tạo 100 bản ghi trong 24h qua
+    now = datetime.now()
+    
+    for i in range(100):
+        # Random thời gian lùi dần về quá khứ (mỗi log cách nhau vài phút)
+        timestamp = now - timedelta(minutes=random.randint(1, 1440)) # 1440 phút = 24h
+        
+        # Random trạng thái (80% là OK, 20% là NG)
+        is_defect = random.choices([True, False], weights=[0.2, 0.8])[0]
+        
+        status = "NG" if is_defect else "OK"
+        defect_type = random.choice(defect_types) if is_defect else "None"
+        confidence = round(random.uniform(0.75, 0.99), 2) if is_defect else 1.0
+        process_time = round(random.uniform(150, 400), 1) # 150ms - 400ms
+        
+        log_entry = {
+            "id": i + 1,
+            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": status,
+            "defect_type": defect_type,
+            "confidence": confidence,
+            "process_time": process_time
+        }
+        data.append(log_entry)
+    
+    # Sắp xếp lại theo thời gian mới nhất lên đầu
+    data.sort(key=lambda x: x['timestamp'], reverse=True)
+    return data
+
+HISTORY_LOG = generate_mock_data()
+
+
+# --- CẬP NHẬT ENDPOINT PIPELINE ---
 @app.post("/process-pipeline")
 async def process_pipeline(file: UploadFile = File(...)):
-    """
-    Xử lý toàn bộ quy trình: Validation -> YOLO -> SVM
-    Input: Ảnh raw
-    Output: JSON chứa kết quả cuối cùng
-    """
-    # Kiểm tra model loaded
+    global counted_ids, HISTORY_LOG
+
+    start_time = time.time() # Bắt đầu đo thời gian
+
     if not all([model_validation, model_yolo, model_svm]):
-        return JSONResponse(status_code=503, content={
-            "status": "error", "message": "Models not loaded"
-        })
+        return JSONResponse(status_code=503, content={"status": "error", "message": "Models not loaded"})
 
     try:
-        # 1. Đọc ảnh
         contents = await file.read()
         img = Image.open(io.BytesIO(contents)).convert("RGB")
-
-        # === BƯỚC 1: VALIDATION (Kiểm tra domain) ===
+        # BƯỚC 1: VALIDATION
         vec_moi = get_validation_vector(img)
         dist = torch.dist(vec_moi, vector_trung_binh).item()
         
         if dist > nguong_khoang_cach:
             return JSONResponse({
                 "status": "invalid_domain",
-                "message": "Ảnh không hợp lệ (Sai domain)",
-                "distance": dist,
-                "box": None
+                "message": "Ảnh khác lạ (Sai domain)",
+                "confidence": 0.0,
+                "box": None,
+                "track_id": None,
+                "total_count": len(counted_ids)
             })
 
-        # === BƯỚC 2: YOLO (Tìm vật thể) ===
-        # Chạy YOLO
-        results = model_yolo(img, verbose=False)
+        # BƯỚC 2: YOLO TRACKING
+        # persist=True giúp YOLO nhớ vật thể giữa các frame
+        results = model_yolo.track(img, persist=True, verbose=False, tracker="bytetrack.yaml")
         
         detected = False
         best_box = None
+        current_track_id = None
         
-        # Kiểm tra xem có detection nào không
+        # Kiểm tra kết quả
         for r in results:
             if len(r.boxes) > 0:
                 detected = True
-                # Lấy box có confidence cao nhất
-                # box format: [x1, y1, x2, y2]
-                box = r.boxes[0] 
-                best_box = box.xyxy[0].tolist() # [x1, y1, x2, y2]
+                
+                # Lấy box đầu tiên (giả sử băng chuyền mỗi lần 1 vật)
+                box = r.boxes[0]
+                best_box = box.xyxy[0].tolist()
+                
+                # Lấy ID theo dõi (Track ID)
+                if box.id is not None:
+                    current_track_id = int(box.id.item())
+                    # Nếu ID này mới, thêm vào danh sách đã đếm
+                    counted_ids.add(current_track_id)
+                
                 break 
         
         if not detected:
             return JSONResponse({
                 "status": "no_object",
                 "message": "Không có vật thể",
-                "distance": dist,
-                "box": None
+                "confidence": 0.0,
+                "box": None,
+                "track_id": None,
+                "total_count": len(counted_ids)
             })
 
-        # === BƯỚC 3: SVM (Phân loại lỗi) ===
-        # (Nếu YOLO tìm thấy vật -> Chạy SVM để phân loại lỗi cụ thể)
-        
-        # Option A: Cắt ảnh theo box YOLO rồi đưa vào SVM (Độ chính xác cao hơn nếu vật nhỏ)
-        crop_img = img.crop((best_box[0], best_box[1], best_box[2], best_box[3]))
-        label, conf = get_svm_prediction(crop_img)
-        
-        # Option B: Đưa toàn bộ ảnh vào SVM (Như cũ - An toàn hơn nếu SVM train với ảnh full)
-        # label, conf = get_svm_prediction(img)
+        # BƯỚC 3: SVM
+        label, conf, probs = get_svm_prediction(img)
 
+        # --- LOGGING DATA ---
+        process_time = (time.time() - start_time) * 1000 # Đổi ra ms
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Tạo bản ghi log
+        log_entry = {
+            "id": len(HISTORY_LOG) + 1,
+            "timestamp": timestamp,
+            "status": "NG" if detected else "OK", # detected là biến từ bước YOLO
+            "defect_type": label if detected else "None",
+            "confidence": float(conf) if detected else 1.0,
+            "process_time": round(process_time, 2)
+        }
+        
+        # Chỉ lưu log nếu phát hiện lỗi hoặc định kỳ (để tránh đầy RAM nếu chạy lâu)
+        # Ở đây ta lưu tất cả để demo Dashboard cho đẹp
+        HISTORY_LOG.insert(0, log_entry) # Thêm vào đầu danh sách
+        if len(HISTORY_LOG) > 1000: HISTORY_LOG.pop() # Giới hạn 1000 bản ghi
+        
+        # Trả về kết quả như cũ
         return JSONResponse({
-            "status": "defect_found",
-            "message": label, # Tên lỗi (VD: Scratch, Dent...)
+            "status": "defect_found" if detected else "no_object",
+            "message": label,
             "confidence": conf,
-            "box": best_box, # Trả về tọa độ để vẽ lên video
-            "distance": dist
+            "box": best_box,
+            "track_id": current_track_id,
+            "total_count": len(counted_ids)
         })
 
     except Exception as e:
         print(f"Error: {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+# --- LẤY DỮ LIỆU THỐNG KÊ ---
+@app.get("/statistics")
+async def get_statistics():
+    """Trả về toàn bộ lịch sử để vẽ biểu đồ"""
+    return JSONResponse(HISTORY_LOG)
 # --- Cách chạy server ---
 # 1. Mở terminal, đi tới thư mục "transferAPI"
 # 2. Chạy lệnh: python -m uvicorn app:app --reload --port 8000

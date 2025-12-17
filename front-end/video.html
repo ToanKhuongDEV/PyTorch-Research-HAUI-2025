@@ -23,6 +23,7 @@
     <div class="nav-bar">
         <button class="nav-button" onclick="location.href='photo.html'">Chụp Ảnh</button>
         <button class="nav-button active">Video Realtime</button>
+        <button class="nav-button" onclick="location.href='dashboard.html'">Thống Kê</button>
     </div>
     
     <main class="main-container">
@@ -94,7 +95,7 @@
                         <div class="video-feed" id="video-display" style="position: relative; width: 100%; height: 100%;">
                             <div class="video-placeholder" id="placeholder" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: #f1f5f9; z-index: 10;">
                                 <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                                <p>Nhấn "Bắt đầu" để chạy Video Realtime</p>
+                                <p>Chọn camera và nhấn "Bắt đầu" để chạy Video Realtime</p>
                             </div>
                         </div>
                     </div>
@@ -119,7 +120,10 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-clipboard-list"></i> Nhật Ký Phát Hiện</h2>
-                    <button class="btn btn-outline btn-sm" onclick="clearLogs()"><i class="fas fa-trash"></i></button>
+                    <div class="card-title-buttons">
+                        <button class="btn btn-outline btn-sm" onclick="clearLogs()"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-outline btn-sm" onclick="resetServerCount()" title="Reset bộ đếm"><i class="fas fa-sync-alt"></i></button>
+                    </div>
                 </div>
                 <div class="card-content">
                     <div class="images-container"> <div class="defect-list" id="log-container">
@@ -133,256 +137,6 @@
         </div>
     </main>
 
-    <script src="js/store.js"></script> <script src="js/api.js"></script>   <script>
-        // --- CẤU HÌNH ---
-        const FPS_TARGET = 5; 
-        const FRAME_INTERVAL = 1000 / FPS_TARGET;
-
-        // --- DOM ELEMENTS ---
-        const cameraSelect = document.getElementById('cameraSelect'); // [MỚI]
-        const startBtn = document.getElementById('start-video');
-        const stopBtn = document.getElementById('stop-video');
-        const displayDiv = document.getElementById('video-display');
-        const placeholder = document.getElementById('placeholder');
-        const logContainer = document.getElementById('log-container');
-        
-        const previewCanvas = document.getElementById('snapshot-preview');
-        const previewCtx = previewCanvas.getContext('2d');
-        
-        const stCam = document.getElementById('status-cam');
-        const stFps = document.getElementById('status-fps');
-        const stObj = document.getElementById('status-objects');
-        const stLast = document.getElementById('status-last-defect');
-
-        // Logic Variables
-        let videoElement = document.createElement('video');
-        videoElement.autoplay = true;
-        videoElement.playsInline = true;
-        
-        let canvas = document.createElement('canvas'); 
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.objectFit = "contain";
-        let ctx = canvas.getContext('2d');
-
-        let isRunning = false;
-        let stream = null;
-        let lastTime = 0;
-        let frameCount = 0;
-        let lastFpsTime = 0;
-        let objectCount = 0;
-        
-        const api = new APIManager({ getMetadata: () => {}, updateMetadata: () => {} });
-
-        // --- [MỚI] HÀM LOAD DANH SÁCH CAMERA ---
-        async function loadCameras() {
-            try {
-                // Xin quyền trước để lấy được tên thiết bị (Label)
-                await navigator.mediaDevices.getUserMedia({ video: true });
-                
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-
-                cameraSelect.innerHTML = '';
-                
-                if (videoDevices.length === 0) {
-                    const option = document.createElement('option');
-                    option.text = "Không tìm thấy camera";
-                    cameraSelect.appendChild(option);
-                    return;
-                }
-
-                videoDevices.forEach((device, index) => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Camera ${index + 1}`;
-                    cameraSelect.appendChild(option);
-                });
-            } catch (err) {
-                console.error("Lỗi load camera:", err);
-                cameraSelect.innerHTML = '<option value="">Lỗi quyền truy cập</option>';
-            }
-        }
-
-        // Gọi load camera ngay khi trang tải xong
-        document.addEventListener('DOMContentLoaded', loadCameras);
-
-        // --- HÀM KHỞI ĐỘNG (CẬP NHẬT) ---
-        startBtn.addEventListener('click', async () => {
-            try {
-                // [MỚI] Lấy ID camera đang chọn
-                const selectedDeviceId = cameraSelect.value;
-                const constraints = {
-                    video: {
-                        deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-                        width: { ideal: 640 }, // Ưu tiên độ phân giải này
-                        height: { ideal: 480 },
-                        frameRate: { ideal: 15 }
-                    }
-                };
-
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                videoElement.srcObject = stream;
-                videoElement.onloadedmetadata = () => {
-                    canvas.width = videoElement.videoWidth;
-                    canvas.height = videoElement.videoHeight;
-                    previewCanvas.width = videoElement.videoWidth;
-                    previewCanvas.height = videoElement.videoHeight;
-
-                    placeholder.classList.add('hidden');
-                    if (!displayDiv.contains(canvas)) {
-                        displayDiv.appendChild(canvas);
-                    }
-                    
-                    isRunning = true;
-                    // Disable select khi đang chạy
-                    cameraSelect.disabled = true; 
-                    updateStatusUI(true);
-                    loop(0);
-                };
-            } catch (err) {
-                alert("Không thể truy cập camera: " + err.message);
-            }
-        });
-
-        // --- HÀM DỪNG (CẬP NHẬT) ---
-        stopBtn.addEventListener('click', () => {
-            isRunning = false;
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            placeholder.classList.remove('hidden');
-            if (displayDiv.contains(canvas)) {
-                displayDiv.removeChild(canvas);
-            }
-            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-            
-            // Enable lại select
-            cameraSelect.disabled = false;
-            updateStatusUI(false);
-        });
-
-        // --- UI UTILS & LOGIC KHÁC (GIỮ NGUYÊN) ---
-        function updateStatusUI(active) {
-            if (active) {
-                stCam.textContent = "Đang chạy";
-                stCam.style.color = "#10b981";
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-            } else {
-                stCam.textContent = "Đang tắt";
-                stCam.style.color = "#e74c3c";
-                stFps.textContent = "0";
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-            }
-        }
-
-        function clearLogs() {
-            logContainer.innerHTML = '<div class="empty-state"><p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p></div>';
-            objectCount = 0;
-            stObj.textContent = 0;
-            stLast.textContent = "---";
-        }
-
-        function addLog(message, conf, colorClass) {
-            const emptyState = logContainer.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
-
-            const item = document.createElement('div');
-            item.className = 'defect-item'; 
-            item.style.marginBottom = '10px';
-            item.style.padding = '10px';
-            item.style.borderLeft = `4px solid ${colorClass}`;
-            item.style.background = '#f8f9fa';
-            item.style.borderRadius = '4px';
-
-            const time = new Date().toLocaleTimeString('vi-VN');
-            
-            item.innerHTML = `
-                <div style="display:flex; justify-content:space-between;">
-                    <strong>${message}</strong>
-                    <span style="font-size: 12px; color: #666;">${time}</span>
-                </div>
-                <div style="font-size: 13px; margin-top: 4px;">Độ tin cậy: ${(conf*100).toFixed(1)}%</div>
-            `;
-
-            logContainer.insertBefore(item, logContainer.firstChild);
-
-            if (logContainer.children.length > 20) {
-                logContainer.removeChild(logContainer.lastChild);
-            }
-
-            stLast.textContent = message;
-        }
-
-        async function loop(timestamp) {
-            if (!isRunning) return;
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-            frameCount++;
-            if (timestamp - lastFpsTime >= 1000) {
-                stFps.textContent = frameCount;
-                frameCount = 0;
-                lastFpsTime = timestamp;
-            }
-
-            if (timestamp - lastTime > FRAME_INTERVAL) {
-                lastTime = timestamp;
-                processFrame();
-            }
-            requestAnimationFrame(loop);
-        }
-
-        async function processFrame() {
-            previewCtx.drawImage(canvas, 0, 0, previewCanvas.width, previewCanvas.height);
-            canvas.toBlob(async (blob) => {
-                if (!blob) return;
-                const result = await api.processPipeline(blob);
-                handleResult(result);
-            }, 'image/jpeg', 0.8);
-        }
-
-        function handleResult(result) {
-            ctx.lineWidth = 3;
-            ctx.font = "18px Arial";
-            const resultText = document.getElementById("current-result-text");
-
-            if (result.status === 'defect_found' && result.box) {
-                const [x1, y1, x2, y2] = result.box;
-                ctx.strokeStyle = "red";
-                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                ctx.fillStyle = "red";
-                ctx.fillRect(x1, y1 - 25, 150, 25);
-                ctx.fillStyle = "white";
-                ctx.fillText(`${result.message}`, x1 + 5, y1 - 6);
-
-                // Cập nhật text dưới ảnh preview
-                resultText.textContent = `⚠️ PHÁT HIỆN: ${result.message} (${(result.confidence * 100).toFixed(0)}%)`;
-                resultText.style.color = "#10b981"; // Đỏ
-
-                addLog(result.message, result.confidence, "red");
-                objectCount++;
-                stObj.textContent = objectCount;
-            } 
-            else if (result.status === 'no_object') {
-                ctx.fillStyle = "yellow";
-                ctx.fillText("Không phát hiện vật thể", 20, 30);
-                
-                // Cập nhật text dưới ảnh preview
-                resultText.textContent = "Không có vật thể";
-                resultText.style.color = "#95a5a6";
-            } 
-            else if (result.status === 'invalid_domain') {
-                ctx.fillStyle = "gray";
-                ctx.fillText("Ảnh không hợp lệ (Sai domain)", 20, 30);
-                
-                // Cập nhật text dưới ảnh preview
-                resultText.textContent = "Ảnh khác lạ (Sai domain)";
-                resultText.style.color = "#e74c3c";
-            }
-        }
-    </script>
+    <script src="js/store.js"></script> <script src="js/api.js"></script>   <script src="js/video.js"></script>
 </body>
 </html>
