@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 from datetime import datetime, timedelta
 import random
 import time
+import sqlite3
 
 import torch
 import torchvision.models as models
@@ -20,6 +21,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from model_def import SimpleResNet, BasicBlock 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "defects.db")
+
 
 # --- KHAI BÁO BIẾN TOÀN CỤC ---
 # 1. Các biến cho mô hình PHÂN LOẠI (SVM)
@@ -168,40 +172,60 @@ async def reset_count():
 
 
 # --- HÀM TẠO DỮ LIỆU GIẢ (MOCK DATA) ---
-def generate_mock_data():
-    data = []
-    defect_types = ["Vết xước", "Vết lõm", "Rỉ sét", "Nứt bề mặt", "Biến dạng"]
+# def generate_mock_data():
+#     data = []
+#     defect_types = ["Vết xước", "Vết lõm", "Rỉ sét", "Nứt bề mặt", "Biến dạng"]
     
-    # Tạo 100 bản ghi trong 24h qua
-    now = datetime.now()
+#     # Tạo 100 bản ghi trong 24h
+#     now = datetime.now()
     
-    for i in range(100):
-        # Random thời gian lùi dần về quá khứ (mỗi log cách nhau vài phút)
-        timestamp = now - timedelta(minutes=random.randint(1, 1440)) # 1440 phút = 24h
+#     for i in range(100):
+#         # Random thời gian lùi dần về quá khứ (mỗi log cách nhau vài phút)
+#         timestamp = now - timedelta(minutes=random.randint(1, 1440)) # 1440 phút = 24h
         
-        # Random trạng thái (80% là OK, 20% là NG)
-        is_defect = random.choices([True, False], weights=[0.2, 0.8])[0]
+#         # Random trạng thái (80% là OK, 20% là NG)
+#         is_defect = random.choices([True, False], weights=[0.2, 0.8])[0]
         
-        status = "NG" if is_defect else "OK"
-        defect_type = random.choice(defect_types) if is_defect else "None"
-        confidence = round(random.uniform(0.75, 0.99), 2) if is_defect else 1.0
-        process_time = round(random.uniform(150, 400), 1) # 150ms - 400ms
+#         status = "NG" if is_defect else "OK"
+#         defect_type = random.choice(defect_types) if is_defect else "None"
+#         confidence = round(random.uniform(0.75, 0.99), 2) if is_defect else 1.0
+#         process_time = round(random.uniform(150, 400), 1) # 150ms - 400ms
         
-        log_entry = {
-            "id": i + 1,
-            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-            "status": status,
-            "defect_type": defect_type,
-            "confidence": confidence,
-            "process_time": process_time
-        }
-        data.append(log_entry)
+#         log_entry = {
+#             "id": i + 1,
+#             "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+#             "status": status,
+#             "defect_type": defect_type,
+#             "confidence": confidence,
+#             "process_time": process_time
+#         }
+#         data.append(log_entry)
     
-    # Sắp xếp lại theo thời gian mới nhất lên đầu
-    data.sort(key=lambda x: x['timestamp'], reverse=True)
-    return data
+#     # Sắp xếp lại theo thời gian mới nhất lên đầu
+#     data.sort(key=lambda x: x['timestamp'], reverse=True)
+#     return data
 
-HISTORY_LOG = generate_mock_data()
+# HISTORY_LOG = generate_mock_data()
+
+# --- HÀM KHỞI TẠO DATABASE ---
+def init_db():
+    conn = sqlite3.connect("defects.db")
+    c = conn.cursor()
+    c.execute('''
+            CREATE TABLE IF NOT EXISTS defect_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                status TEXT,
+                defect_type TEXT,
+                confidence REAL,
+                process_time REAL
+            )''')
+    conn.commit()
+    conn.close()
+
+
+# Gọi hàm khởi tạo DB khi server chạy
+init_db()
 
 
 # --- CẬP NHẬT ENDPOINT PIPELINE ---
@@ -283,6 +307,23 @@ async def process_pipeline(file: UploadFile = File(...)):
             "process_time": round(process_time, 2)
         }
         
+        # Ghi log vào database
+        try:
+            conn = sqlite3.connect("defects.db")
+            c = conn.cursor()
+            c.execute("INSERT INTO inspections (timestamp, status, defect_type, confidence, process_time) VALUES (?, ?, ?, ?, ?)",
+                      (timestamp, 
+                       "NG" if detected else "OK", 
+                       label if detected else "None", 
+                       float(conf) if detected else 1.0, 
+                       round(process_time, 2)))
+            conn.commit()
+            conn.close()
+        except Exception as db_err:
+            print(f"Lỗi ghi log vào database: {db_err}")
+        return JSONResponse({ ... })
+
+
         # Chỉ lưu log nếu phát hiện lỗi hoặc định kỳ (để tránh đầy RAM nếu chạy lâu)
         # Ở đây ta lưu tất cả để demo Dashboard cho đẹp
         HISTORY_LOG.insert(0, log_entry) # Thêm vào đầu danh sách
@@ -305,8 +346,35 @@ async def process_pipeline(file: UploadFile = File(...)):
 # --- LẤY DỮ LIỆU THỐNG KÊ ---
 @app.get("/statistics")
 async def get_statistics():
-    """Trả về toàn bộ lịch sử để vẽ biểu đồ"""
-    return JSONResponse(HISTORY_LOG)
+    """Lấy dữ liệu từ database"""
+    try:
+        conn = sqlite3.connect("defects.db")
+        # Trả kết quả dưới dạng dictionary
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+
+        # Lấy tất cả dữ liệu, mới nhất lên đầu
+        c.execute("SELECT * FROM inspections ORDER BY timestamp DESC LIMIT 100")
+        rows = c.fetchall()
+        conn.close()
+
+        data = []
+        for row in rows:
+            data.append({
+                "id": row["id"],
+                "timestamp": row["timestamp"],
+                "status": row["status"],
+                "defect_type": row["defect_type"],
+                "confidence": row["confidence"],
+                "process_time": row["process_time"]
+            })
+
+        return JSONResponse(data)
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+    
+    return JSONResponse(inspections)
 # --- Cách chạy server ---
 # 1. Mở terminal, đi tới thư mục "transferAPI"
 # 2. Chạy lệnh: python -m uvicorn app:app --reload --port 8000
