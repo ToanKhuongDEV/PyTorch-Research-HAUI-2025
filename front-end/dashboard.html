@@ -7,73 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        /* CSS riêng cho Dashboard đè lên style cũ */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .kpi-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .kpi-title { font-size: 0.9rem; color: var(--muted-foreground); margin-bottom: 0.5rem; }
-        .kpi-value { font-size: 2rem; font-weight: bold; color: var(--foreground); }
-        .kpi-icon { float: right; opacity: 0.2; font-size: 1.5rem; }
-        
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr; /* Biểu đồ đường to hơn Pie */
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            height: 400px;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: calc(100% - 2rem); /* trừ chiều cao title */
-        }
-
-        .chart-wrapper canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        .data-table-container {
-            background: white;
-            border-radius: var(--radius);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background-color: var(--muted); font-weight: 600; font-size: 0.875rem; }
-        tr:hover { background-color: #f8fafc; }
-    </style>
 </head>
 <body>
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-chart-pie"></i></div>
                 <div class="logo-text">
-                    <h1>Hệ Thống Giám Sát</h1>
-                    <p>Dashboard & Analytics</p>
+                    <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
+                    <p>Industrial Metal Surface Defect Detection System</p>
                 </div>
             </div>
         </div>

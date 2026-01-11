@@ -1,30 +1,70 @@
-/* Badges */
+/* Status Indicators */
 .badge {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.25rem 0.5rem;
-	border-radius: 9999px;
-	font-size: 0.75rem;
-	font-weight: 500;
-	gap: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-mono);
+    border: 1px solid transparent;
 }
 
 .badge-default {
-	background-color: var(--accent);
-	color: var(--accent-foreground);
+    background-color: var(--primary-dim);
+    color: var(--primary);
+    border-color: rgba(0, 229, 255, 0.3);
 }
 
 .badge-secondary {
-	background-color: var(--muted);
-	color: var(--muted-foreground);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--secondary-foreground);
+    border-color: var(--border);
 }
 
 .badge-destructive {
-	background-color: var(--destructive);
-	color: var(--destructive-foreground);
+    background-color: rgba(255, 51, 51, 0.15);
+    color: var(--destructive);
+    border-color: rgba(255, 51, 51, 0.3);
+    box-shadow: 0 0 8px rgba(255, 51, 51, 0.1);
 }
 
 .badge-success {
-	background-color: #10b981;
-	color: white;
+    background-color: rgba(0, 255, 102, 0.15);
+    color: var(--success);
+    border-color: rgba(0, 255, 102, 0.3);
+}
+
+.badge-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+}
+
+/* Status Rows in Cards */
+.status-container {
+    display: flex;
+    flex-direction: column; /* Stacked for better mobile/desktop consistency */
+    gap: 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span:first-child {
+    color: var(--secondary-foreground);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }

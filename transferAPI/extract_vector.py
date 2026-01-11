@@ -8,20 +8,17 @@ from PIL import Image
 import numpy as np
 
 # --- CẤU HÌNH ---
-# 1. CHỈNH SỬA ĐƯỜNG DẪN NÀY
-#    Đây là thư mục chứa N ảnh "chuẩn" (ảnh OK) của bạn.
 THU_MUC_ANH_CHUAN = "E:/University/NCKH/Dataset/Dataset/200_Free" 
 
-# 2. Nơi lưu file "chuẩn" (Đã khớp với cấu trúc thư mục của bạn)
+# Nơi lưu file "chuẩn" (Đã khớp với cấu trúc thư mục của bạn)
 SAVE_DIR = "transferAPI/saved"
 FILE_VECTOR_TRUNG_BINH = os.path.join(SAVE_DIR, "vector_trung_binh.npy")
 FILE_NGUONG_KHOANG_CACH = os.path.join(SAVE_DIR, "nguong_khoang_cach.txt")
 # --- KẾT THÚC CẤU HÌNH ---
 
-# Đảm bảo thư mục "saved" tồn tại
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-# 1. Định nghĩa hàm tiền xử lý (PHẢI GIỐNG HỆT TRONG app.py kiểm tra)
+# Định nghĩa hàm tiền xử lý (GIỐNG TRONG app.py kiểm tra)
 tien_xu_ly = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -29,7 +26,7 @@ tien_xu_ly = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-# 2. Tải model ResNet50 (PHẢI GIỐNG HỆT TRONG app.py kiểm tra)
+# Tải model ResNet50
 print("Đang tải mô hình ResNet50...")
 model = models.resnet50(weights='IMAGENET1K_V1')
 model = torch.nn.Sequential(*list(model.children())[:-1]) # Bỏ lớp cuối
@@ -43,7 +40,7 @@ def trich_xuat_vector(image_path):
         img_t = tien_xu_ly(img)
         batch_t = torch.unsqueeze(img_t, 0) # Tạo batch
         
-        with torch.no_grad(): # Không cần tính gradient
+        with torch.no_grad(): # Không tính gradient
             vector = model(batch_t)
             
         return vector.flatten() # Làm phẳng vector
@@ -51,7 +48,7 @@ def trich_xuat_vector(image_path):
         print(f"Lỗi khi xử lý ảnh {image_path}: {e}")
         return None
 
-# 3. Trích xuất vector từ N ảnh chuẩn
+# Trích xuất vector từ N ảnh chuẩn
 print(f"Đang đọc ảnh từ: {THU_MUC_ANH_CHUAN}")
 cac_vector = []
 # Tìm tất cả các file ảnh (jpg, png)
@@ -75,17 +72,17 @@ else:
         ma_tran_vector = torch.stack(cac_vector)
         print(f"Kích thước ma trận vector: {ma_tran_vector.shape}") # (n_images, 2048)
         
-        # 4. Tính vector trung bình
+        # Tính vector trung bình
         vector_trung_binh = torch.mean(ma_tran_vector, dim=0)
         print(f"Kích thước vector trung bình: {vector_trung_binh.shape}") # (2048)
         
-        # 5. Tính khoảng cách lớn nhất (ngưỡng)
+        # Tính khoảng cách lớn nhất (ngưỡng)
         khoang_cach = [torch.dist(v, vector_trung_binh) for v in cac_vector]
         nguong_khoang_cach = max(khoang_cach).item()
         
         print(f"Khoảng cách lớn nhất (ngưỡng): {nguong_khoang_cach}")
         
-        # 6. Lưu file
+        # Lưu file
         np.save(FILE_VECTOR_TRUNG_BINH, vector_trung_binh.numpy())
         with open(FILE_NGUONG_KHOANG_CACH, 'w') as f:
             f.write(str(nguong_khoang_cach))
