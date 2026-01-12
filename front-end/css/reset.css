@@ -75,3 +75,44 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
 }
+
+/* --- LIGHT THEME OVERRIDES --- */
+/* Khi thẻ html có attribute data-theme="light" */
+:root[data-theme="light"] {
+    /* Base - Industrial Light Grey */
+    --background: #f0f2f5;       
+    --foreground: #1e293b;       /* Slate 800 - High contrast text */
+    
+    /* Surfaces - Clean White */
+    --card: #ffffff;             
+    --card-foreground: #0f172a;
+    --card-header: #f8fafc;      /* Very light grey */
+    
+    /* Signal Colors - Adjusted for Light Background */
+    --primary: #0284c7;          /* Safety Blue (Darker than Cyan for readability) */
+    --primary-dim: rgba(2, 132, 199, 0.1);
+    --primary-foreground: #ffffff;
+    
+    --secondary: #e2e8f0;
+    --secondary-foreground: #64748b;
+    
+    /* Structural */
+    --border: #cbd5e1;           /* Distinct grey borders */
+    --input: #f1f5f9;            /* Light input bg */
+    
+    /* Status Colors */
+    --accent: #d97706;           /* Darker Amber */
+    --destructive: #dc2626;      /* Darker Red */
+    --success: #16a34a;          /* Darker Green */
+}
+
+/* Điều chỉnh màu scrollbar cho Light mode */
+:root[data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

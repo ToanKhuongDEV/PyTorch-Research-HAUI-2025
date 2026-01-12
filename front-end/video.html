@@ -11,11 +11,16 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <!-- <div class="logo-icon"><i class="fas fa-industry"></i></div> -->
-                <div class="logo-text">
-                    <h1>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</h1>
-                    <p>Industrial Metal Surface Defect Detection System</p>
+                <div class="logo-icon"><i class="fas fa-industry"></i></div> <div class="logo-text">
+                    <h1>Hệ Thống Nhận Diện Khuyết Tật</h1>
+                    <p>Industrial Metal Surface Defect Detection</p>
                 </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggleBtn" title="Chổi giao diện Sáng/Tối">
+                    <i class="fas fa-sun"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -93,7 +98,7 @@
 
                     <div class="video-container" style="min-height: 480px; background: #000;">
                         <div class="video-feed" id="video-display" style="position: relative; width: 100%; height: 100%;">
-                            <div class="video-placeholder" id="placeholder" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: #f1f5f9; z-index: 10;">
+                            <div class="video-placeholder" id="placeholder" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 10;">
                                 <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                                 <p>Chọn camera và nhấn "Bắt đầu" để chạy Video Realtime</p>
                             </div>
@@ -138,5 +143,6 @@
     </main>
 
     <script src="js/store.js"></script> <script src="js/api.js"></script>   <script src="js/video.js"></script>
+    <script src="js/theme.js"></script>
 </body>
 </html>

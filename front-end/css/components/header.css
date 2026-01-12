@@ -1,6 +1,7 @@
 /* Header - Machine Status Bar */
 .header {
-    background-color: #111;
+    /* SỬA: Dùng biến var(--card) thay vì #111 */
+    background-color: var(--card); 
     border-bottom: 1px solid var(--border);
     padding: 0;
     height: 64px;
@@ -8,6 +9,7 @@
     align-items: center;
     flex-shrink: 0;
     z-index: 50;
+    transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng chuyển màu mượt */
 }
 
 .header-container {
@@ -24,7 +26,7 @@
     gap: 1rem;
 }
 
-/* Logo looks like a lit indicator */
+/* Logo icon */
 .logo-icon {
     width: 32px;
     height: 32px;
@@ -42,7 +44,8 @@
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--foreground);
+    /* SỬA: Dùng biến foreground thay vì cứng */
+    color: var(--foreground); 
     font-weight: 700;
 }
 
@@ -55,12 +58,14 @@
 
 /* Navigation - Physical Tabs */
 .nav-bar {
-    background-color: #1a1d24;
+    /* SỬA: Dùng biến input hoặc card thay vì #1a1d24 */
+    background-color: var(--input); 
     border-bottom: 1px solid var(--border);
     padding: 0 1.5rem;
     display: flex;
     gap: 4px;
     border-radius: 0;
+    transition: background-color 0.3s;
 }
 
 .nav-button {
@@ -75,17 +80,46 @@
     letter-spacing: 0.5px;
     transition: all 0.2s;
     border-radius: var(--radius) var(--radius) 0 0;
-    margin-bottom: -1px; /* Overlap border */
+    margin-bottom: -1px; 
 }
 
 .nav-button:hover {
     color: var(--foreground);
-    background-color: rgba(255, 255, 255, 0.03);
+    /* SỬA: Dùng rgba theo biến foreground để hợp cả sáng/tối */
+    background-color: var(--background);
 }
 
 .nav-button.active {
     color: var(--primary);
-    background-color: var(--background); /* Blend with main bg */
+    /* SỬA: Dùng biến background để tiệp màu với nền */
+    background-color: var(--background); 
     border-color: var(--border);
-    border-top: 2px solid var(--primary); /* Active indicator */
+    border-top: 2px solid var(--primary); 
+}
+
+/* Actions area (cho nút toggle theme) */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--secondary-foreground);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background-color: var(--primary-dim);
 }
