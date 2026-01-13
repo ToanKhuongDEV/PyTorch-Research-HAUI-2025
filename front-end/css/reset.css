@@ -36,6 +36,8 @@
     /* Typography */
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'Consolas', monospace; /* Critical for data */
+
+    --hover-overlay: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -104,6 +106,8 @@ body {
     --accent: #d97706;           /* Darker Amber */
     --destructive: #dc2626;      /* Darker Red */
     --success: #16a34a;          /* Darker Green */
+
+    --hover-overlay: rgba(0, 0, 0, 0.05);
 }
 
 /* Điều chỉnh màu scrollbar cho Light mode */

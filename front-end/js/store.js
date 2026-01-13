@@ -8,7 +8,7 @@ class AppStore {
         this.capturedImages = [];
         this.imageMetadata = [];
         this.currentPage = 1;
-        this.imagesPerPage = 4;
+        this.imagesPerPage = 6;
     }
 
     // Thêm ảnh vào store
