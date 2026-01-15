@@ -114,15 +114,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 3. Xử lý kết quả trả về từ API
         if (result.status === 'error') {
             meta.production.result = "LỖI MẠNG";
-            meta.production.confidence = "N/A";
+            // meta.production.confidence = "N/A";
         } 
         else if (result.status === 'invalid_domain') {
             meta.production.result = "SAI DOMAIN"; // Hoặc "Ảnh lạ"
-            meta.production.confidence = "N/A";
+            // meta.production.confidence = "N/A";
         } 
         else if (result.status === 'no_object') {
             meta.production.result = "KHÔNG CÓ VẬT";
-            meta.production.confidence = "N/A";
+            // meta.production.confidence = "N/A";
         } 
         else if (result.status === 'defect_found') {
             // Đây là trường hợp thành công: Có vật + Đã phân loại lỗi
