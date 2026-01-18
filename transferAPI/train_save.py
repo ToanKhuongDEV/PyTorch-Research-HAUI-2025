@@ -1,37 +1,87 @@
-# train_save.py
+# transferAPI/train_save.py
 import os
 import time
+import copy
 import numpy as np
 from tqdm import tqdm
-from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import joblib
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-from model_def import SimpleResNet, BasicBlock
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, classification_report
 
 # ==== CẤU HÌNH ====
-TRAIN_DIR = "D:/DATASET/GC10-DET-DIVIDED/train"
-TEST_DIR  = "D:/DATASET/GC10-DET-DIVIDED/val"
+
+TRAIN_DIR = "E:/University/NCKH/Dataset/Defection/Magnetic-tile-defect-datasets/train"
+TEST_DIR  = "E:/University/NCKH/Dataset/Defection/Magnetic-tile-defect-datasets/test"
+
+# TRAIN_DIR = "E:/University/NCKH/Dataset/Defection/NEU-DET_Full/NEU Metal Surface Defects Data/train"
+# TEST_DIR  = "E:/University/NCKH/Dataset/Defection/NEU-DET_Full/NEU Metal Surface Defects Data/test"
+
 BATCH_SIZE = 32
 LR = 0.001
-NUM_EPOCHS = 50
+NUM_EPOCHS = 100        
+PATIENCE = 10           
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ==== TIỀN XỬ LÝ ====
+# ==== 1. ĐỊNH NGHĨA MODEL ====
+class MetalConvNet(nn.Module):
+    def __init__(self, in_channels=1, num_classes=10, feat_dim=128):
+        super().__init__()
+        # Input: (Batch, 1, 200, 200)
+        self.conv1 = nn.Conv2d(in_channels, 16, 3, padding=1)
+        self.bn1 = nn.BatchNorm2d(16)
+        
+        self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
+        
+        self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
+        self.bn3 = nn.BatchNorm2d(64)
+        
+        self.pool = nn.MaxPool2d(2, 2)
+        self.gap = nn.AdaptiveAvgPool2d(1) # Global Average Pooling -> (Batch, 64, 1, 1)
+        
+        self.fc_feat = nn.Linear(64, feat_dim)
+        self.fc_out = nn.Linear(feat_dim, num_classes)
+
+    def forward(self, x, feature_extract=False):
+        # Layer 1
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))
+        # Layer 2
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))
+        # Layer 3
+        x = self.pool(F.leaky_relu(self.bn3(self.conv3(x)), 0.1))
+        
+        # Global Avg Pool & Flatten
+        x = self.gap(x)
+        x = x.view(x.size(0), -1) # (Batch, 64)
+        
+        # Feature Vector
+        feat = F.relu(self.fc_feat(x)) # (Batch, 128)
+        
+        if feature_extract:
+            return feat
+            
+        # Classification Head (chỉ dùng lúc train CNN)
+        out = self.fc_out(feat)
+        return out
+
+# ==== 2. TIỀN XỬ LÝ DỮ LIỆU ====
 transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
+    transforms.Grayscale(num_output_channels=1), 
     transforms.Resize((200, 200)),
     transforms.ToTensor(),
     transforms.Normalize([0.5], [0.5])
 ])
 
+print(f"Loading data from: {TRAIN_DIR}")
 train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=transform)
 test_dataset = datasets.ImageFolder(TEST_DIR, transform=transform)
 
@@ -40,52 +90,102 @@ test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 class_names = train_dataset.classes
 num_classes = len(class_names)
-print("Classes:", class_names)
+print(f"Detected {num_classes} classes: {class_names}")
 
-# ==== MÔ HÌNH ====
-model = SimpleResNet(BasicBlock, [1,1,1], num_classes).to(DEVICE)
+# ==== 3. KHỞI TẠO MODEL ====
+# in_channels=1 vì ta dùng Grayscale
+model = MetalConvNet(in_channels=1, num_classes=num_classes, feat_dim=128).to(DEVICE)
 
-# ==== HUẤN LUYỆN CNN ====
-def train_cnn(model, dataloader, num_epochs):
-    model.train()
+# ==== 4. HUẤN LUYỆN CNN VỚI EARLY STOPPING ====
+def train_model_with_patience(model, train_loader, val_loader, epochs, patience):
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-
-    start = time.time()
-    for epoch in range(num_epochs):
+    optimizer = optim.Adam(model.parameters(), lr=LR)
+    
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+    patience_counter = 0 # Đếm số epoch không cải thiện
+    
+    start_time = time.time()
+    
+    print(f"\n--- Starting Training (Patience={patience}) ---")
+    
+    for epoch in range(epochs):
+        # A. Training Phase
+        model.train()
         running_loss = 0.0
-        total = 0
-        correct = 0
-        for images, labels in dataloader:
+        correct_train = 0
+        total_train = 0
+        
+        for images, labels in train_loader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
+            
+            optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, labels)
-
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
             running_loss += loss.item() * images.size(0)
             _, preds = torch.max(outputs, 1)
-            total += labels.size(0)
-            correct += (preds == labels).sum().item()
-
-        epoch_loss = running_loss / total
-        epoch_acc = 100 * correct / total
-        print(f"[Epoch {epoch+1}/{num_epochs}] Loss: {epoch_loss:.4f} Acc: {epoch_acc:.2f}%")
-    print("Finished CNN training. Time:", time.time() - start)
+            total_train += labels.size(0)
+            correct_train += (preds == labels).sum().item()
+            
+        epoch_loss = running_loss / total_train
+        epoch_acc = 100 * correct_train / total_train
+        
+        # B. Validation Phase
+        model.eval()
+        correct_val = 0
+        total_val = 0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(DEVICE), labels.to(DEVICE)
+                outputs = model(images)
+                _, preds = torch.max(outputs, 1)
+                total_val += labels.size(0)
+                correct_val += (preds == labels).sum().item()
+        
+        val_acc = 100 * correct_val / total_val
+        
+        print(f"Epoch [{epoch+1}/{epochs}] "
+              f"Train Loss: {epoch_loss:.4f} Acc: {epoch_acc:.2f}% | "
+              f"Val Acc: {val_acc:.2f}%")
+        
+        # C. Early Stopping Logic
+        if val_acc > best_acc:
+            best_acc = val_acc
+            best_model_wts = copy.deepcopy(model.state_dict())
+            patience_counter = 0 # Reset đếm
+            print(f"  -> New best model found! (Acc: {best_acc:.2f}%)")
+        else:
+            patience_counter += 1
+            print(f"  -> No improvement. Patience: {patience_counter}/{patience}")
+            
+        if patience_counter >= patience:
+            print(f"\nEarly stopping triggered after {epoch+1} epochs.")
+            break
+            
+    time_elapsed = time.time() - start_time
+    print(f"Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
+    print(f"Best Val Acc: {best_acc:.2f}%")
+    
+    # Load trọng số tốt nhất vào model
+    model.load_state_dict(best_model_wts)
     return model
 
-model = train_cnn(model, train_loader, NUM_EPOCHS)
+# Bắt đầu train
+model = train_model_with_patience(model, train_loader, test_loader, NUM_EPOCHS, PATIENCE)
 
-# ==== TRÍCH XUẤT ĐẶC TRƯNG ====
+# ==== 5. TRÍCH XUẤT ĐẶC TRƯNG CHO SVM ====
+print("\n--- Extracting Features for SVM ---")
 def extract_features(model, dataloader):
     model.eval()
     all_feats = []
     all_labels = []
     with torch.no_grad():
-        for images, labels in tqdm(dataloader, desc="Extracting features"):
+        for images, labels in tqdm(dataloader, desc="Extracting"):
             images = images.to(DEVICE)
+            # feature_extract=True để lấy vector 128 chiều thay vì logits
             feats = model(images, feature_extract=True)
             all_feats.append(feats.cpu().numpy())
             all_labels.append(labels.numpy())
@@ -96,37 +196,45 @@ def extract_features(model, dataloader):
 X_train, y_train = extract_features(model, train_loader)
 X_test, y_test = extract_features(model, test_loader)
 
-# ==== HUẤN LUYỆN SVM (probability=True) ====
+# ==== 6. HUẤN LUYỆN SVM ====
+print("\n--- Training SVM ---")
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-svm = SVC(kernel='linear', C=1.0, probability=True)  # BẬT probability
-print("Training SVM (this may take time)...")
-t0 = time.time()
+svm = SVC(kernel='rbf', C=10.0, probability=True) 
 svm.fit(X_train_scaled, y_train)
-print("SVM trained in", time.time() - t0, "s")
+print("SVM Training Finished.")
 
-# ==== ĐÁNH GIÁ SVM ====
+# ==== 7. ĐÁNH GIÁ KẾT QUẢ ====
 y_pred = svm.predict(X_test_scaled)
 acc = accuracy_score(y_test, y_pred)
-precision_macro = precision_score(y_test, y_pred, average='macro', zero_division=0)
-recall_macro = recall_score(y_test, y_pred, average='macro', zero_division=0)
-f1_macro = f1_score(y_test, y_pred, average='macro', zero_division=0)
-f1_weighted = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+print(f"\nSVM Accuracy on Test Set: {acc:.4f}")
+print(classification_report(y_test, y_pred, target_names=class_names))
 
-print("\n===== SVM EVAL =====")
-print(f"Accuracy: {acc:.4f}")
-print(f"Precision (macro): {precision_macro:.4f}")
-print(f"Recall (macro): {recall_macro:.4f}")
-print(f"F1 (macro): {f1_macro:.4f}")
-print(f"F1 (weighted): {f1_weighted:.4f}")
-
-# ==== LƯU MÔ HÌNH & SCALER & CLASSES ====
+# ==== 8. LƯU FILE ====
 os.makedirs("saved", exist_ok=True)
-torch.save(model.state_dict(), "saved/resnet_weights.pth")
-joblib.dump(scaler, "saved/scaler.pkl")
-joblib.dump(svm, "saved/svm_model.pkl")
-np.save("saved/classes.npy", np.array(class_names))
 
-print("Saved files to ./saved: resnet_weights.pth, scaler.pkl, svm_model.pkl, classes.npy")
+# Lưu Model CNN
+torch.save(model.state_dict(), "saved/resnet_weights.pth")
+# Lưu Scaler
+joblib.dump(scaler, "saved/scaler.pkl")
+# Lưu SVM
+joblib.dump(svm, "saved/svm_model.pkl")
+# Lưu Classes
+NAME_MAPPING = {
+    "MT_Blowhole": "Rỗ khí (Blowhole)",
+    "MT_Break":    "Gãy nứt (Break)",
+    "MT_Crack":    "Vết nứt (Crack)",
+    "MT_Fray":     "Xước xơ (Fray)",
+    "MT_Free":     "Sản phẩm tốt",
+    "MT_Uneven":   "Bề mặt lồi lõm (Uneven)",
+}
+
+new_class_names = [NAME_MAPPING.get(name, name) for name in class_names]
+
+print("\nĐang lưu danh sách tên lỗi mới:", new_class_names)
+
+np.save("saved/classes.npy", np.array(new_class_names))
+
+print("Files created: resnet_weights.pth, scaler.pkl, svm_model.pkl, classes.npy")
