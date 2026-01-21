@@ -130,16 +130,22 @@ stopBtn.addEventListener('click', () => {
 // --- UI UTILS & LOGIC KHÁC (GIỮ NGUYÊN) ---
 function updateStatusUI(active) {
     if (active) {
-        stCam.textContent = "Đang chạy";
-        stCam.style.color = "#10b981";
+        stCam.textContent = "ĐANG CHẠY";
+        stCam.className = "badge badge-success";
+        stCam.style.color = "";
+        
         startBtn.disabled = true;
         stopBtn.disabled = false;
+        cameraSelect.disabled = true;
     } else {
-        stCam.textContent = "Đang tắt";
-        stCam.style.color = "#e74c3c";
+        stCam.textContent = "ĐANG TẮT";
+        stCam.className = "badge badge-destructive";
+        stCam.style.color = "";
+        
         stFps.textContent = "0";
         startBtn.disabled = false;
         stopBtn.disabled = true;
+        cameraSelect.disabled = false;
     }
 }
 
@@ -150,35 +156,34 @@ function clearLogs() {
     stLast.textContent = "---";
 }
 
-function addLog(message, conf, colorClass) {
+function addLog(message, conf, colorClass, imageSrc) {
+    const logContainer = document.getElementById('log-container');
     const emptyState = logContainer.querySelector('.empty-state');
     if (emptyState) emptyState.remove();
 
     const item = document.createElement('div');
-    item.className = 'defect-item'; 
-    item.style.marginBottom = '10px';
-    item.style.padding = '10px';
-    item.style.borderLeft = `4px solid ${colorClass}`;
-    item.style.background = '#f8f9fa';
-    item.style.borderRadius = '4px';
+    item.className = 'defect-log-item'; // Class mới đồng bộ style
 
     const time = new Date().toLocaleTimeString('vi-VN');
     
     item.innerHTML = `
-        <div style="display:flex; justify-content:space-between;">
-            <strong>${message}</strong>
-            <span style="font-size: 12px; color: #666;">${time}</span>
+        <img src="${imageSrc}" class="log-thumb" alt="defect">
+        <div class="log-info">
+            <div class="log-title">${message}</div>
+            <div class="log-meta">
+                <span>Confidence: ${(conf*100).toFixed(1)}%</span>
+                <span>${time}</span>
+            </div>
         </div>
-        <div style="font-size: 13px; margin-top: 4px;">Độ tin cậy: ${(conf*100).toFixed(1)}%</div>
     `;
 
+    // Chèn lỗi mới lên đầu danh sách
     logContainer.insertBefore(item, logContainer.firstChild);
 
-    if (logContainer.children.length > 20) {
+    // Giới hạn số lượng bản ghi hiển thị (ví dụ 30)
+    if (logContainer.children.length > 30) {
         logContainer.removeChild(logContainer.lastChild);
     }
-
-    stLast.textContent = message;
 }
 
 async function loop(timestamp) {
@@ -221,11 +226,9 @@ async function resetServerCount() {
 }
 
 function handleResult(result) {
-    ctx.lineWidth = 3;
+ctx.lineWidth = 3;
     ctx.font = "18px Arial";
 
-    // 1. CẬP NHẬT SỐ LƯỢNG (QUAN TRỌNG)
-    // Nếu server trả về total_count, cập nhật ngay lên giao diện
     if (result.total_count !== undefined) {
         stObj.textContent = result.total_count;
     }
@@ -233,32 +236,31 @@ function handleResult(result) {
     if (result.status === 'defect_found' && result.box) {
         const [x1, y1, x2, y2] = result.box;
         
-        // Vẽ khung
+        // --- GIỮ NGUYÊN PHẦN VẼ BOX TRÊN CANVAS CHÍNH ---
         ctx.strokeStyle = "red";
         ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-        
-        // Vẽ nền chữ (Cao hơn chút để chứa 2 dòng text)
         ctx.fillStyle = "red";
         ctx.fillRect(x1, y1 - 45, 180, 45); 
-        
-        // Dòng 1: Tên lỗi
         ctx.fillStyle = "white";
         ctx.font = "bold 16px Arial";
         ctx.fillText(`${result.message}`, x1 + 5, y1 - 25);
+
+        // --- BẮT ĐẦU PHẦN SỬA ĐỂ ĐẨY VÀO NHẬT KÝ ---
         
-        // Dòng 2: ID vật thể + Độ tin cậy
-        ctx.font = "14px Arial";
-        // Nếu có track_id thì hiện ID, nếu không thì hiện "New"
-        const idText = result.track_id ? `ID: #${result.track_id}` : "ID: New";
-        ctx.fillText(`${idText} | ${(result.confidence * 100).toFixed(0)}%`, x1 + 5, y1 - 5);
+        // 1. Chụp lại ảnh từ previewCanvas (ảnh frame đã xử lý)
+        const defectSnapshot = previewCanvas.toDataURL('image/jpeg', 0.5); // 0.5 là chất lượng thấp để nhẹ web
 
-        // Cập nhật text preview dưới ảnh nhỏ
-        resultText.textContent = `⚠️ #${result.track_id || '?'} - ${result.message}`;
-        resultText.style.color = "#e74c3c";
+        // 2. Gọi addLog với ảnh vừa chụp
+        addLog(
+            `#${result.track_id || '?'} - ${result.message}`, 
+            result.confidence, 
+            "red", 
+            defectSnapshot
+        );
 
-        // Thêm vào nhật ký
-        addLog(`#${result.track_id || '?'} - ${result.message}`, result.confidence, "red");
-    } 
+        // Cập nhật trạng thái cuối
+        stLast.textContent = result.message;
+    }
     else if (result.status === 'no_object') {
         ctx.fillStyle = "yellow";
         ctx.fillText("Đang chờ vật thể...", 20, 30);

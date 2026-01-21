@@ -46,7 +46,7 @@
 /* Status Rows in Cards */
 .status-container {
     display: flex;
-    flex-direction: column; /* Stacked for better mobile/desktop consistency */
+    flex-direction: column;
     gap: 0;
 }
 

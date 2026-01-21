@@ -13,7 +13,7 @@ from sklearn.ensemble import IsolationForest
 import joblib
 
 # --- CẤU HÌNH ---
-THU_MUC_ANH_CHUAN = "E:/University/NCKH/Dataset/Dataset_conveyor_OG/Free"  # Chỉ chứa ảnh Kim loại chuẩn
+THU_MUC_ANH_CHUAN = "E:/University/NCKH/Dataset/NEU-DET-train-yolo/train/images"  # Chỉ chứa ảnh Kim loại chuẩn
 SAVE_DIR = "transferAPI/saved"
 FILE_MODEL_OOD = os.path.join(SAVE_DIR, "ood_pipeline.pkl")
 

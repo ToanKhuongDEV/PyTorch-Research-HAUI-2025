@@ -36,29 +36,40 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadCameras();
     
     // Camera event handlers
+    // 1. Xử lý khi Camera BẮT ĐẦU chạy
     camera.on('streamStarted', (stream) => {
         videoFeed.srcObject = stream;
+        // Hiện video
         videoFeed.classList.remove('hidden');
-        videoOverlay.classList.remove('hidden');
+        // Ẩn vùng đen (Placeholder)
         videoPlaceholder.classList.add('hidden');
+        // Đã xóa dòng gọi videoOverlay để tránh lỗi
         updateUI();
     });
     
+    // 2. Xử lý khi Camera DỪNG lại
     camera.on('streamStopped', () => {
         videoFeed.srcObject = null;
+        
+        // Ẩn video
         videoFeed.classList.add('hidden');
-        videoOverlay.classList.add('hidden');
+        
+        // Hiện lại vùng đen
         videoPlaceholder.classList.remove('hidden');
+        
         updateUI();
     });
     
+    // 3. Xử lý cập nhật TRẠNG THÁI (Màu sắc & Text)
     camera.on('statusChanged', (streaming) => {
         if (streaming) {
-            systemCameraStatus.textContent = 'Hoạt động';
-            systemCameraStatus.className = 'badge badge-default';
+            // Trạng thái bật: Màu Xanh (badge-success)
+            systemCameraStatus.textContent = 'ĐANG CHẠY';
+            systemCameraStatus.className = 'badge badge-success';
         } else {
-            systemCameraStatus.textContent = 'Tắt';
-            systemCameraStatus.className = 'badge badge-secondary';
+            // Trạng thái tắt: Màu Đỏ (badge-destructive)
+            systemCameraStatus.textContent = 'ĐANG TẮT';
+            systemCameraStatus.className = 'badge badge-destructive';
         }
         updateUI();
     });

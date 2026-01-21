@@ -34,122 +34,99 @@
     
     <!-- Main Content -->
     <main class="main-container">
-        <!-- System Status Card -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-cog"></i>
-                    Trạng Thái Hệ Thống
-                </h2>
-            </div>
-            <div class="card-content" style="padding : 0rem 1rem">
-                <div class="status-container">
-                    <div class="info-row">
-                        <span>Camera</span>
-                        <span class="badge badge-secondary" id="systemCameraStatus">Tắt</span>
-                    </div>
-                    <div class="info-row">
-                        <span>Ảnh đã chụp</span>
-                        <span class="badge badge-outline" id="capturedCount">0 ảnh</span>
-                    </div>
-                </div>
-            </div>
-        </div>
         
-        <!-- Left Column - Camera Feed -->
         <div class="left-column">
-            <!-- Camera Feed Card -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
                         <i class="fas fa-camera"></i>
-                        Camera
+                        Camera Live
                     </h2>
                 </div>
                 <div class="card-content">
-                    <!-- Camera Controls -->
                     <div class="camera-controls">
                         <select class="select" id="cameraSelect">
                             <option value="">Chọn camera</option>
                         </select>
                         
                         <button class="btn btn-default" id="startCameraBtn">
-                            <i class="fas fa-camera"></i>
-                            Bật Camera
+                            <i class="fas fa-camera"></i> Bật Camera
                         </button>
                         
                         <button class="btn btn-destructive" id="stopCameraBtn" disabled>
-                            <i class="fas fa-camera-slash"></i>
-                            Tắt Camera
+                            <i class="fas fa-camera-slash"></i>Tắt Camera
                         </button>
                         
                         <button class="btn btn-accent" id="captureBtn" disabled>
-                            <i class="fas fa-camera-retro"></i>
-                            Chụp Ảnh
+                            <i class="fas fa-camera-retro"></i> Chụp Ảnh
                         </button>
 
                         <button class="btn btn-accent" id="uploadImageBtn">
-                            <i class="fas fa-upload"></i>
-                            Upload Ảnh
+                            <i class="fas fa-upload"></i> Upload
                         </button>
                     </div>
                     
-                    <!-- Error Message -->
-                    <div class="hidden" id="errorMessage">
-                        <p class="text-sm" id="errorText"></p>
-                    </div>
-                    
-                    <!-- Video Feed -->
                     <div class="video-container">
                         <div class="video-placeholder" id="videoPlaceholder">
                             <i class="fas fa-camera"></i>
                             <p>Camera chưa được khởi động</p>
-                            <p class="text-sm">Chọn camera và nhấn "Bật Camera" để bắt đầu</p>
                         </div>
                         <video class="video-feed hidden" id="videoFeed" autoplay playsinline></video>
                         <div class="video-overlay hidden" id="videoOverlay">
-                            <div class="grid-overlay">
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
-                                <div class="grid-cell"></div>
+                            <!-- <div class="grid-overlay">
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
                             </div>
-                            <div class="crosshair"></div>
+                            <div class="crosshair"></div> -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Right Column - System Status and Captured Images -->
         <div class="right-column">
             
-            <!-- Captured Images Card -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-image"></i>
-                        Ảnh Đã Chụp
-                    </h2>
+                    <h2 class="card-title"><i class="fas fa-server"></i> Trạng Thái</h2>
+                </div>
+                <div class="card-content" style="padding: 0rem 1rem">
+                    <div class="status-container">
+                        <!-- <div class="info-row">
+                            <span>Backend API</span>
+                            <span class="badge badge-success">Online</span>
+                        </div> -->
+                        <div class="info-row">
+                            <span>Camera</span>
+                            <span class="badge badge-destructive" id="systemCameraStatus">Tắt</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Số ảnh</span>
+                            <span class="badge badge-outline" id="capturedCount">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-images"></i> Ảnh Đã Chụp</h2>
                     <button class="btn btn-outline btn-sm hidden" id="clearAllBtn">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-                <div class="card-content">
+                <div class="card-content" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                     <div class="images-container">
                         <div class="empty-state" id="emptyState">
                             <i class="fas fa-image"></i>
-                            <p>Chưa có ảnh nào được chụp</p>
+                            <p>Chưa có ảnh</p>
                         </div>
                         <div class="image-list hidden" id="imageList"></div>
-                    </div>
+                        </div>
                 </div>
             </div>
+
         </div>
     </main>
 

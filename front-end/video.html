@@ -11,14 +11,14 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-industry"></i></div> <div class="logo-text">
+                <div class="logo-icon"><i class="fas fa-industry"></i></div> 
+                <div class="logo-text">
                     <h1>Hệ Thống Nhận Diện Khuyết Tật</h1>
                     <p>Industrial Metal Surface Defect Detection</p>
                 </div>
             </div>
-
             <div class="header-actions">
-                <button class="theme-toggle" id="themeToggleBtn" title="Chổi giao diện Sáng/Tối">
+                <button class="theme-toggle" id="themeToggleBtn" title="Giao diện Sáng/Tối">
                     <i class="fas fa-sun"></i>
                 </button>
             </div>
@@ -32,56 +32,10 @@
     </div>
     
     <main class="main-container">
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">                    
-                    <i class="fas fa-cog"></i>
-                    Trạng thái hệ thống</h2>
-            </div>
-            <div class="card-content" style="padding : 0rem 1rem">
-                <!-- <div class="system-status"> -->
-                <div class="status-container">
-                    <div class="info-row">
-                        <span>Camera</span>
-                        <span class="badge badge-secondary" id="status-cam">Tắt</span>
-                    </div>
-                    <div class="info-row">
-                        <span>FPS</span>
-                        <span class="badge badge-secondary" id="status-fps">0</span>
-                    </div>
-                    <div class="info-row">
-                        <span>Số vật thể phát hiện</span>
-                        <span class="badge badge-secondary" id="status-objects">0</span>
-                    </div>
-                    <div class="info-row">
-                        <span>Lỗi phát hiện gần nhất</span>
-                        <span class="badge badge-secondary" id="status-last-defect">0</span>
-                    </div>
-                    <!-- <div class="status-item">
-                        <h3>Trạng thái Camera</h3>
-                        <p id="status-cam" style="color: #e74c3c;">Đang tắt</p>
-                    </div> -->
-                    <!-- <div class="status-item">
-                        <h3>FPS Xử lý</h3>
-                        <p id="status-fps">0</p>
-                    </div>
-                    <div class="status-item">
-                        <h3>Số vật thể phát hiện</h3>
-                        <p id="status-objects">0</p>
-                    </div>
-                    <div class="status-item">
-                        <h3>Lỗi phát hiện gần nhất</h3>
-                        <p id="status-last-defect" style="font-size: 14px;">---</p>
-                    </div> -->
-                </div>
-            </div>
-        </div>
-        
         <div class="left-column">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-video"></i> Camera Live Feed</h2>
+                    <h2 class="card-title"><i class="fas fa-video"></i> Camera Realtime Feed</h2>
                 </div>
                 <div class="card-content">
                     <div class="camera-controls">
@@ -96,12 +50,21 @@
                         </button>
                     </div>
 
-                    <div class="video-container" style="min-height: 480px; background: #000;">
-                        <div class="video-feed" id="video-display" style="position: relative; width: 100%; height: 100%;">
-                            <div class="video-placeholder" id="placeholder" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 10;">
-                                <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                                <p>Chọn camera và nhấn "Bắt đầu" để chạy Video Realtime</p>
+                    <div class="video-container" style="position: relative; flex: 1; background: #000;">
+                        <div class="video-placeholder" id="placeholder">
+                            <i class="fas fa-video"></i>
+                            <p>Camera chưa được khởi động</p>
+                        </div>
+                        
+                        <div id="video-display" style="width: 100%; height: 100%;"></div>
+                        
+                        <div class="video-overlay" id="videoOverlay">
+                            <!-- <div class="grid-overlay">
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
                             </div>
+                            <div class="crosshair"></div> -->
                         </div>
                     </div>
                 </div>
@@ -109,31 +72,41 @@
         </div>
         
         <div class="right-column">
-
-            <div class="card" style="flex: 0 0 auto; margin-bottom: 1.5rem;">
+            <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-camera-retro"></i> Ảnh Đang Xử Lý</h2>
+                    <h2 class="card-title"><i class="fas fa-server"></i> Trạng Thái</h2>
                 </div>
-                <div class="card-content" style="padding: 10px; display: flex; justify-content: center; align-items: center; background: #f8f9fa; min-height: 150px;">
-                    <canvas id="snapshot-preview" style="max-width: 100%; height: auto; max-height: 200px; border: 1px solid #ddd;"></canvas>
-                    <div id="current-result-text" style="margin-top: 10px; font-weight: 600; font-size: 16px; text-align: center; width: 100%; padding: 5px; border-radius: 4px; background: white; border: 1px solid #eee;">
-                        ---
+                <div class="card-content" style="padding: 0rem 1rem">
+                    <div class="status-container">
+                        <div class="info-row">
+                            <span>Camera</span>
+                            <span class="badge badge-destructive" id="status-cam">Tắt</span>
+                        </div>
+                        <div class="info-row">
+                            <span>FPS</span>
+                            <span class="badge badge-outline" id="status-fps">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Tổng lỗi</span>
+                            <span class="badge badge-destructive" id="status-objects">0</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-clipboard-list"></i> Nhật Ký Phát Hiện</h2>
-                    <div class="card-title-buttons">
-                        <button class="btn btn-outline btn-sm" onclick="clearLogs()"><i class="fas fa-trash"></i></button>
-                        <button class="btn btn-outline btn-sm" onclick="resetServerCount()" title="Reset bộ đếm"><i class="fas fa-sync-alt"></i></button>
-                    </div>
+                    <h2 class="card-title"><i class="fas fa-history"></i> Nhật ký lỗi</h2>
+                    <button class="btn btn-outline btn-sm" onclick="resetServerCount()" title="Làm mới">
+                        <i class="fas fa-sync"></i>
+                    </button>
                 </div>
-                <div class="card-content">
-                    <div class="images-container"> <div class="defect-list" id="log-container">
+                <div class="card-content" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                    <div class="images-container">
+                        <div id="log-container" class="image-list">
                             <div class="empty-state">
-                                <p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p>
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Chưa có dữ liệu phát hiện</p>
                             </div>
                         </div>
                     </div>
@@ -142,7 +115,11 @@
         </div>
     </main>
 
-    <script src="js/store.js"></script> <script src="js/api.js"></script>   <script src="js/video.js"></script>
+    <canvas id="snapshot-preview" class="hidden"></canvas>
+
+    <script src="js/store.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/video.js"></script>
     <script src="js/theme.js"></script>
 </body>
 </html>

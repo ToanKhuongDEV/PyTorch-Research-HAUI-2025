@@ -19,8 +19,8 @@ from sklearn.metrics import accuracy_score, classification_report
 
 # ==== CẤU HÌNH ====
 
-TRAIN_DIR = "E:/University/NCKH/Dataset/Defection/Magnetic-tile-defect-datasets/train"
-TEST_DIR  = "E:/University/NCKH/Dataset/Defection/Magnetic-tile-defect-datasets/test"
+TRAIN_DIR = "E:/University/NCKH/Dataset/Defection/NEU-DET-added-free-label/train"
+TEST_DIR  = "E:/University/NCKH/Dataset/Defection/NEU-DET-added-free-label/test"
 
 # TRAIN_DIR = "E:/University/NCKH/Dataset/Defection/NEU-DET_Full/NEU Metal Surface Defects Data/train"
 # TEST_DIR  = "E:/University/NCKH/Dataset/Defection/NEU-DET_Full/NEU Metal Surface Defects Data/test"
@@ -28,7 +28,7 @@ TEST_DIR  = "E:/University/NCKH/Dataset/Defection/Magnetic-tile-defect-datasets/
 BATCH_SIZE = 32
 LR = 0.001
 NUM_EPOCHS = 100        
-PATIENCE = 10           
+PATIENCE = 10
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ==== 1. ĐỊNH NGHĨA MODEL ====
@@ -74,7 +74,27 @@ class MetalConvNet(nn.Module):
         return out
 
 # ==== 2. TIỀN XỬ LÝ DỮ LIỆU ====
-transform = transforms.Compose([
+# Transform cho tập Train
+train_transform = transforms.Compose([
+    transforms.Grayscale(num_output_channels=1),
+    
+    # 1. Biến đổi hình học
+    transforms.Resize((220, 220)), # Resize lớn hơn chút
+    transforms.RandomCrop(200),    # Cắt ngẫu nhiên về 200 -> Tạo sự dịch chuyển
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(degrees=15), # Xoay nhẹ +/- 15 độ
+    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)), # Co giãn nhẹ
+    
+    # 2. Biến đổi chất lượng ảnh
+    transforms.ColorJitter(brightness=0.2, contrast=0.2), # Thay đổi độ sáng/tương phản
+    transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)), # Làm mờ nhẹ
+    transforms.ToTensor(),
+    transforms.Normalize([0.5], [0.5])
+])
+
+# Transform cho tập Test
+test_transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1), 
     transforms.Resize((200, 200)),
     transforms.ToTensor(),
@@ -82,8 +102,9 @@ transform = transforms.Compose([
 ])
 
 print(f"Loading data from: {TRAIN_DIR}")
-train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=transform)
-test_dataset = datasets.ImageFolder(TEST_DIR, transform=transform)
+# Lưu ý: Train dùng train_transform, Test dùng test_transform
+train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=train_transform)
+test_dataset = datasets.ImageFolder(TEST_DIR, transform=test_transform)
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)

@@ -1,24 +1,13 @@
 /* Main layout */
 .main-container {
-	flex: 1;
-	display: grid;
-	
-	/* 1. Định nghĩa các "vùng" layout */
-	grid-template-areas:
-		"status status"
-		"left   right";
-	
-	/* 2. Kích thước cột (giữ nguyên yêu cầu 2fr 1fr) */
-	grid-template-columns: 2fr 1fr;
-	
-	/* 3. Kích thước hàng: Hàng 'status' tự động, hàng 'left'/'right' lấp đầy */
-	grid-template-rows: auto 1fr;
-	
-	gap: 1.5rem;
-	padding: 1.5rem;
-	overflow: hidden;
-	max-width: 100%;
-	height: calc(100vh - 80px); /* Giữ nguyên từ file cũ */
+    display: flex;
+    flex-direction: row; /* Xếp ngang */
+    gap: 1rem;
+    padding: 1rem;
+    /* 100vh - (Header 64px + Nav ~50px + Padding). Điều chỉnh số 120px nếu cần */
+    height: calc(100vh - 120px); 
+    overflow: hidden; /* Ẩn thanh cuộn của body */
+    align-items: stretch;
 }
 
 /* 4. Gán các phần tử HTML vào "vùng" đã định nghĩa */
@@ -30,35 +19,53 @@
 }
 
 .left-column {
-	grid-area: left;
-	/* Cần thiết lập lại flex/height để card bên trong co dãn đúng */
+    flex: 7;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Fix lỗi flexbox bị tràn nội dung */
+    height: 100%;
+}
+
+.left-column .card {
+	height: 100%; 
+	margin-bottom: 0 !important;
 	display: flex;
 	flex-direction: column;
-	min-height: 0; /* Sửa lỗi co dãn của grid item */
+}
+
+.left-column .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0; /* Tận dụng tối đa không gian dưới */
+    overflow: hidden;
 }
 
 .right-column {
-	grid-area: right;
-	/* Cần thiết lập lại flex/height để card bên trong co dãn đúng */
-	display: flex;
-	flex-direction: column;
-	min-height: 0; /* Sửa lỗi co dãn của grid item */
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    min-width: 320px; /* Đảm bảo không quá nhỏ */
+    overflow-y: auto; /* Cho phép cuộn riêng cột phải nếu nội dung dài */
 }
 
-/* 5. Đảm bảo 2 card chính lấp đầy 2 cột và tự cuộn */
-
-/* Làm cho card bên trong cột trái/phải lấp đầy 100% chiều cao */
-.left-column > .card,
-.right-column > .card {
-	flex: 1; /* Quan trọng: lấp đầy không gian còn lại */
-	display: flex;
-	flex-direction: column;
-	overflow: hidden; /* Ẩn cuộn ở card */
+/* Các card bên phải không được tự co lại */
+.right-column .card {
+    flex-shrink: 0; 
+    margin-bottom: 0 !important;
 }
 
-/* Làm cho *nội dung* bên trong card có thể cuộn */
-.left-column > .card > .card-content,
-.right-column > .card > .card-content {
-	flex: 1;
-	overflow: auto; /* Cho phép cuộn nội dung (ví dụ: danh sách ảnh) */
+.smart-log-card {
+    flex: 1; /* Chiếm toàn bộ phần còn lại của cột phải */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#log-container {
+    flex: 1;
+    overflow-y: auto; /* Cuộn nội dung lỗi */
+    padding: 10px;
 }
