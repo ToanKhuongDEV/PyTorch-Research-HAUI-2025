@@ -23,7 +23,8 @@ let videoElement = document.createElement('video');
 videoElement.autoplay = true;
 videoElement.playsInline = true;
 
-let canvas = document.createElement('canvas'); 
+let canvas = document.createElement('canvas');
+canvas.className = 'video-feed';
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 canvas.style.objectFit = "contain";
@@ -188,7 +189,36 @@ function addLog(message, conf, colorClass, imageSrc) {
 
 async function loop(timestamp) {
     if (!isRunning) return;
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+    // CẮT ẢNH VUÔNG (CENTER CROP) 
+    const vw = videoElement.videoWidth;
+    const vh = videoElement.videoHeight;
+
+    // Chưa load được kích thước video thì đợi frame sau
+    if (vw === 0 || vh === 0) {
+        requestAnimationFrame(loop);
+        return;
+    }
+
+    const size = Math.min(vw, vh);
+    const sx = (vw - size) / 2;
+    const sy = (vh - size) / 2;
+
+    // Đặt kích thước canvas xử lý thành vuông
+    if (canvas.width !== size || canvas.height !== size) {
+        canvas.width = size;
+        canvas.height = size;
+        // Preview canvas vuông
+        previewCanvas.width = size;
+        previewCanvas.height = size;
+    }
+
+    // Vẽ phần trung tâm video vào canvas
+    ctx.save();
+    ctx.translate(size, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(videoElement, sx, sy, size, size, 0, 0, size, size);
+    ctx.restore();
 
     frameCount++;
     if (timestamp - lastFpsTime >= 1000) {

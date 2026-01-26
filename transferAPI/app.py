@@ -223,6 +223,7 @@ async def process_pipeline(file: UploadFile = File(...)):
                 status_res = "INVALID"
                 defect_label = "Sai domain"
                 confidence = 0.0
+                # pass
         
         # --- BƯỚC 2: YOLO TRACKING & CROP ---
         if status_res == "OK":

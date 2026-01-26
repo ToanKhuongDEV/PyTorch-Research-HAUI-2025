@@ -117,16 +117,35 @@ class CameraManager {
         }
 
         const ctx = canvas.getContext('2d');
-        canvas.width = videoFeed.videoWidth;
-        canvas.height = videoFeed.videoHeight;
-        ctx.drawImage(videoFeed, 0, 0, canvas.width, canvas.height);
+        
+        // Lấy kích thước gốc của video từ camera
+        const vw = videoFeed.videoWidth;
+        const vh = videoFeed.videoHeight;
+        
+        // Tính toán hình vuông nhỏ nhất (cạnh ngắn nhất)
+        const size = Math.min(vw, vh);
+        
+        // Tính tọa độ để cắt chính giữa (Center Crop)
+        const sx = (vw - size) / 2;
+        const sy = (vh - size) / 2;
+
+        // Set kích thước canvas thành vuông
+        canvas.width = size;
+        canvas.height = size;
+
+        // Vẽ phần cắt vào canvas
+        ctx.save();
+        ctx.translate(size, 0);
+        ctx.scale(-1, 1); 
+        ctx.drawImage(videoFeed, sx, sy, size, size, 0, 0, size, size);
+        ctx.restore();
 
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
         return {
             imageData,
             canvas,
-            width: canvas.width,
-            height: canvas.height
+            width: size,
+            height: size
         };
     }
 }
