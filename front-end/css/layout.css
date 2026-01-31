@@ -1,71 +1,181 @@
-/* Main layout */
+/* css/layout.css */
+/* --- MAIN LAYOUT CONTAINER --- */
 .main-container {
     display: flex;
-    flex-direction: row; /* Xếp ngang */
-    gap: 1rem;
+    flex-direction: row; /* Xếp ngang 3 cột: Nav - Center - Right */
+    gap: 1rem;         /* Khoảng cách thoáng giữa các cột */
     padding: 1rem;
-    /* 100vh - (Header 64px + Nav ~50px + Padding). Điều chỉnh số 120px nếu cần */
-    height: calc(100vh - 120px); 
-    overflow: hidden; /* Ẩn thanh cuộn của body */
-    align-items: stretch;
+    height: calc(100vh - 64px); /* Full màn hình trừ Header */
+    overflow: hidden;    /* Ngăn cuộn trang chính */
+    background-color: var(--background);
 }
 
-/* 4. Gán các phần tử HTML vào "vùng" đã định nghĩa */
-
-/* Gán card đầu tiên (Trạng Thái) vào vùng 'status' */
-.main-container > .card:first-child {
-	grid-area: status;
-	flex: 0 0 auto; /* Đảm bảo card này không bị co dãn sai */
-}
-
-.left-column {
-    flex: 7;
+/* --- CỘT 1: NAVBAR (Trái) --- */
+.nav-column {
+    width: 240px;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Fix lỗi flexbox bị tràn nội dung */
-    height: 100%;
+    flex-shrink: 0;
+    height: 100%; /* Đảm bảo cột cao full */
 }
 
-.left-column .card {
-	height: 100%; 
-	margin-bottom: 0 !important;
-	display: flex;
-	flex-direction: column;
-}
-
-.left-column .card-content {
-    flex: 1;
+.nav-column .card {
     display: flex;
     flex-direction: column;
-    padding-bottom: 0; /* Tận dụng tối đa không gian dưới */
+    /* QUAN TRỌNG: Dòng này giúp card giãn hết chiều cao từ trên xuống dưới */
+    flex: 1; 
+}
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem;
+    width: 100%;
+    text-align: left;
+    
+    background-color: transparent;
+    color: var(--secondary-foreground);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+    background-color: var(--card); /* Hover sáng nhẹ */
+    color: var(--foreground);
+    transform: translateX(4px);    /* Hiệu ứng đẩy nhẹ sang phải */
+}
+
+.nav-button.active {
+    background-color: var(--primary-dim); 
+    color: var(--primary);
+    border-color: var(--primary-dim);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.05);
+}
+
+.nav-button i {
+    width: 20px; /* Cố định chiều rộng icon để text thẳng hàng */
+    text-align: center;
+}
+
+/* --- CỘT 2: CENTER (Camera - Giữa) --- */
+/* Class này thay thế cho left-column cũ ở vị trí giữa */
+.center-column {
+    flex: 1; /* Chiếm toàn bộ khoảng trống còn lại */
+    display: flex;
+    flex-direction: column;
+    align-items: center;     /* Căn giữa ngang */
+    justify-content: center; /* Căn giữa dọc */
+    min-width: 0;            /* Quan trọng: Tránh vỡ layout khi video to */
+    padding-bottom: 0rem;    /* Khoảng đệm dưới cùng */
+}
+
+.center-column .card {
+    width: 100%;
+    max-width: 100vh; /* Giới hạn độ rộng để giữ form đẹp */
+    /* QUAN TRỌNG: Style giống ảnh mẫu (Nền trắng, có viền, có bóng) */
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+    border-radius: var(--radius);
+    
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 }
 
+.center-column .card-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--card-header);
+    
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--primary);
+    letter-spacing: 0.5px;
+}
+
+.center-column .card-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0rem;
+}
+
+/* Tinh chỉnh Camera Controls */
+.camera-controls {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    
+    /* Style hộp nổi */
+    /* background-color: var(--background); */
+    /* padding: 10px 15px; */
+    /* border: 1px solid var(--border); */
+    /* border-radius: var(--radius); */
+    /* box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); */
+}
+
+/* Khung Video Vuông */
+.video-container {
+    width: 100%;
+    padding-top: 100%; /* Giữ tỉ lệ Vuông 1:1 */
+    border-radius: var(--radius);
+    border: 4px solid #000; /* Viền đen dày bao quanh video */
+    background-color: #000;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* --- CỘT 3: RIGHT (Thông tin - Phải) --- */
 .right-column {
-    flex: 3;
+    width: 440px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    height: 100%;
-    min-width: 320px; /* Đảm bảo không quá nhỏ */
-    overflow-y: auto; /* Cho phép cuộn riêng cột phải nếu nội dung dài */
+    flex-shrink: 0;
 }
 
-/* Các card bên phải không được tự co lại */
-.right-column .card {
-    flex-shrink: 0; 
-    margin-bottom: 0 !important;
+/* Card trạng thái (Trên cùng) */
+.right-column .card:last-child {
+    flex: 1;
+    min-height: 0;
 }
 
-.smart-log-card {
-    flex: 1; /* Chiếm toàn bộ phần còn lại của cột phải */
-    overflow: hidden;
+/* Card danh sách ảnh (Dưới cùng) - Giãn hết phần còn lại */
+.right-column .card:last-child {
+    flex: 1;
+    min-height: 0; /* Fix lỗi scroll trên Firefox */
     display: flex;
     flex-direction: column;
 }
 
-#log-container {
+/* Nội dung bên trong card danh sách ảnh */
+.right-column .card-content {
+    overflow: hidden; /* Để scrollbar nằm ở log-container con */
+    display: flex;
+    flex-direction: column;
+}
+
+.smart-log-card, .images-container {
     flex: 1;
-    overflow-y: auto; /* Cuộn nội dung lỗi */
-    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#log-container, #imageList {
+    flex: 1;
+    overflow-y: auto; /* Scrollbar xuất hiện ở đây */
+    padding-right: 5px; /* Tránh scrollbar che nội dung */
 }

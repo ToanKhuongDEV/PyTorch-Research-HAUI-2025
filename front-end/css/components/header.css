@@ -56,47 +56,6 @@
     text-transform: uppercase;
 }
 
-/* Navigation - Physical Tabs */
-.nav-bar {
-    /* SỬA: Dùng biến input hoặc card thay vì #1a1d24 */
-    background-color: var(--input); 
-    border-bottom: 1px solid var(--border);
-    padding: 0 1.5rem;
-    display: flex;
-    gap: 4px;
-    border-radius: 0;
-    transition: background-color 0.3s;
-}
-
-.nav-button {
-    background: transparent;
-    color: var(--secondary-foreground);
-    border: 1px solid transparent;
-    border-bottom: none;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.2s;
-    border-radius: var(--radius) var(--radius) 0 0;
-    margin-bottom: -1px; 
-}
-
-.nav-button:hover {
-    color: var(--foreground);
-    /* SỬA: Dùng rgba theo biến foreground để hợp cả sáng/tối */
-    background-color: var(--background);
-}
-
-.nav-button.active {
-    color: var(--primary);
-    /* SỬA: Dùng biến background để tiệp màu với nền */
-    background-color: var(--background); 
-    border-color: var(--border);
-    border-top: 2px solid var(--primary); 
-}
-
 /* Actions area (cho nút toggle theme) */
 .header-actions {
     display: flex;

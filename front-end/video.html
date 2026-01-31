@@ -25,14 +25,28 @@
         </div>
     </header>
 
-    <div class="nav-bar">
-        <button class="nav-button" onclick="location.href='photo.html'">Chụp Ảnh</button>
-        <button class="nav-button active">Video Realtime</button>
-        <button class="nav-button" onclick="location.href='dashboard.html'">Thống Kê</button>
-    </div>
     
     <main class="main-container">
-        <div class="left-column">
+        <nav class="nav-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-bars"></i> Menu</h2>
+                </div>
+                <div class="card-content" style="padding: 0.5rem; gap: 0.5rem; display: flex; flex-direction: column;">
+                    <button class="nav-button" onclick="location.href='photo.html'">
+                        <i class="fas fa-camera"></i> Chụp Ảnh
+                    </button>
+                    <button class="nav-button active" onclick="location.href='video.html'">
+                        <i class="fas fa-video"></i> Video Realtime
+                    </button>
+                    <button class="nav-button" onclick="location.href='dashboard.html'">
+                        <i class="fas fa-chart-bar"></i> Thống Kê
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="center-column">
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-video"></i> Camera Realtime Feed</h2>

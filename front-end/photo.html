@@ -26,16 +26,29 @@
         </div>
     </header>
 
-    <div class="nav-bar">
-        <button class="nav-button active" data-target="capture">Chụp Ảnh</button>
-        <button class="nav-button" data-target="video" onclick="location.href='video.html'">Video Realtime</button>
-        <button class="nav-button" onclick="location.href='dashboard.html'">Thống Kê</button>
-    </div>
     
     <!-- Main Content -->
     <main class="main-container">
+        <nav class="nav-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-bars"></i> Menu</h2>
+                </div>
+                <div class="card-content" style="padding: 0.5rem; gap: 0.5rem; display: flex; flex-direction: column;">
+                    <button class="nav-button active" onclick="location.href='photo.html'">
+                        <i class="fas fa-camera"></i> Chụp Ảnh
+                    </button>
+                    <button class="nav-button" onclick="location.href='video.html'">
+                        <i class="fas fa-video"></i> Video Realtime
+                    </button>
+                    <button class="nav-button" onclick="location.href='dashboard.html'">
+                        <i class="fas fa-chart-bar"></i> Thống Kê
+                    </button>
+                </div>
+            </div>
+        </nav>
         
-        <div class="left-column">
+        <div class="center-column">
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">
@@ -50,19 +63,23 @@
                         </select>
                         
                         <button class="btn btn-default" id="startCameraBtn">
-                            <i class="fas fa-camera"></i> Bật Camera
+                            <i class="fas fa-camera"></i> 
+                            Bật Camera
                         </button>
                         
                         <button class="btn btn-destructive" id="stopCameraBtn" disabled>
-                            <i class="fas fa-camera-slash"></i>Tắt Camera
+                            <i class="fas fa-camera-slash"></i>
+                            Tắt Camera
                         </button>
                         
                         <button class="btn btn-accent" id="captureBtn" disabled>
-                            <i class="fas fa-camera-retro"></i> Chụp Ảnh
+                            <i class="fas fa-camera-retro"></i> 
+                            Chụp Ảnh
                         </button>
 
                         <button class="btn btn-accent" id="uploadImageBtn">
-                            <i class="fas fa-upload"></i> Upload
+                            <i class="fas fa-upload"></i> 
+                            Upload
                         </button>
                     </div>
                     

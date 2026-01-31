@@ -12,104 +12,120 @@
     <header class="header">
         <div class="header-container">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-industry"></i></div> <div class="logo-text">
+                <div class="logo-icon"><i class="fas fa-industry"></i></div> 
+                <div class="logo-text">
                     <h1>Hệ Thống Nhận Diện Khuyết Tật</h1>
                     <p>Industrial Metal Surface Defect Detection</p>
                 </div>
             </div>
-
             <div class="header-actions">
-                <button class="theme-toggle" id="themeToggleBtn" title="Chổi giao diện Sáng/Tối">
-                    <i class="fas fa-sun"></i>
-                </button>
+                <button class="theme-toggle" id="themeToggleBtn"><i class="fas fa-sun"></i></button>
             </div>
         </div>
     </header>
-
-    <div class="nav-bar">
-        <button class="nav-button" onclick="location.href='photo.html'">Chụp Ảnh</button>
-        <button class="nav-button" onclick="location.href='video.html'">Video Realtime</button>
-        <button class="nav-button active">Thống Kê</button>
-    </div>
     
-    <main class="main-container" style="display: block; overflow-y: auto;">
+    <main class="main-container">
         
-        <div class="d-flex justify-content-between align-items-center mb-4" style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <div style="display: flex; gap: 10px;">
-                <select class="select" id="timeFilter">
-                    <option value="today">Hôm nay</option>
-                    <option value="week">Tuần này</option>
-                    <option value="month">Tháng này</option>
-                </select>
-                <button class="btn btn-default" id="refreshBtn"><i class="fas fa-sync"></i> Làm mới</button>
+        <nav class="nav-column">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-bars"></i> Menu</h2>
+                </div>
+                <div class="card-content" style="padding: 0.5rem; gap: 0.5rem; display: flex; flex-direction: column;">
+                    <button class="nav-button" onclick="location.href='photo.html'">
+                        <i class="fas fa-camera"></i> Chụp Ảnh
+                    </button>
+                    <button class="nav-button" onclick="location.href='video.html'">
+                        <i class="fas fa-video"></i> Video Realtime
+                    </button>
+                    <button class="nav-button active" onclick="location.href='dashboard.html'">
+                        <i class="fas fa-chart-bar"></i> Thống Kê
+                    </button>
+                </div>
             </div>
-            <button class="btn btn-outline" onclick="exportToCSV()"><i class="fas fa-file-export"></i> Xuất Excel</button>
-        </div>
+        </nav>
 
-        <div class="dashboard-grid">
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-title">Tổng Kiểm Tra</div>
-                    <div class="kpi-value" id="kpi-total">0</div>
+        <div class="dashboard-column">
+            <div class="d-flex" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 10px;">
+                    <select class="select" id="timeFilter">
+                        <option value="today">Hôm nay</option>
+                        <option value="week">Tuần này</option>
+                        <option value="month">Tháng này</option>
+                        <option value="all">Toàn bộ</option>
+                    </select>
+                    <button class="btn btn-default" id="refreshBtn"><i class="fas fa-sync"></i> Làm mới</button>
                 </div>
-                <i class="fas fa-cubes kpi-icon"></i>
+                <button class="btn btn-outline" id="exportBtn"><i class="fas fa-file-export"></i> Xuất Excel</button>
             </div>
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-title">Tỷ Lệ Lỗi</div>
-                    <div class="kpi-value" id="kpi-rate" style="color: #e74c3c;">0%</div>
+    
+            <div class="dashboard-grid">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Tổng Kiểm Tra</div>
+                        <div class="kpi-value" id="kpi-total">0</div>
+                    </div>
+                    <i class="fas fa-cubes kpi-icon" style="color: var(--primary);"></i>
                 </div>
-                <i class="fas fa-exclamation-triangle kpi-icon"></i>
-            </div>
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-title">Sản Phẩm Đạt (OK)</div>
-                    <div class="kpi-value" id="kpi-ok" style="color: #10b981;">0</div>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Tỷ Lệ Lỗi</div>
+                        <div class="kpi-value" id="kpi-rate" style="color: var(--destructive);">0%</div>
+                    </div>
+                    <i class="fas fa-exclamation-triangle kpi-icon" style="color: var(--destructive);"></i>
                 </div>
-                <i class="fas fa-check-circle kpi-icon"></i>
-            </div>
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-title">Tốc Độ Xử Lý TB</div>
-                    <div class="kpi-value" id="kpi-time">0 ms</div>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Sản Phẩm Đạt (OK)</div>
+                        <div class="kpi-value" id="kpi-ok" style="color: var(--success);">0</div>
+                    </div>
+                    <i class="fas fa-check-circle kpi-icon" style="color: var(--success);"></i>
                 </div>
-                <i class="fas fa-stopwatch kpi-icon"></i>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-title">Thời Gian TB</div>
+                        <div class="kpi-value" id="kpi-time">0 ms</div>
+                    </div>
+                    <i class="fas fa-stopwatch kpi-icon" style="color: var(--accent);"></i>
+                </div>
             </div>
+    
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Xu Hướng (Theo giờ)</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Phân Bố Loại Lỗi</h3>
+                    <div class="chart-wrapper" style="position: relative; height: 80%;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="data-table-container">
+                <div style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+                    <h3 style="margin: 0;">Lịch Sử Quét Gần Nhất (20 dòng)</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Thời Gian</th>
+                                <th>Trạng Thái</th>
+                                <th>Loại Lỗi</th>
+                                <th>Độ Tin Cậy</th>
+                                <th>Xử lý (ms)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- <div style="height: 50px;"></div>  -->
         </div>
-
-        <div class="charts-grid">
-            <div class="chart-container">
-                <h3 style="margin-bottom: 1rem;">Xu Hướng Phát Hiện Lỗi</h3>
-                <canvas id="trendChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3 style="margin-bottom: 1rem;">Phân Bố Loại Lỗi</h3>
-            <div class="chart-wrapper">
-                <canvas id="pieChart"></canvas>
-            </div>
-            </div>
-        </div>
-
-        <div class="data-table-container">
-            <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
-                <h3 style="margin: 0;">Lịch Sử Quét Gần Nhất</h3>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Thời Gian</th>
-                        <th>Trạng Thái</th>
-                        <th>Loại Lỗi</th>
-                        <th>Độ Tin Cậy</th>
-                        <th>Thời gian xử lý</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    </tbody>
-            </table>
-        </div>
-        <div style="height: 50px;"></div>
     </main>
 
     <script src="js/dashboard.js"></script>

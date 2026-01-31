@@ -1,0 +1,181 @@
+/* css/components/dashboard.css */
+
+.dashboard-column {
+    flex: 1; /* Chiếm toàn bộ không gian còn lại bên phải Navbar */
+    height: 100%;
+    overflow-y: auto; /* Cuộn dọc độc lập */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-right: 5px; /* Tránh thanh cuộn đè lên nội dung */
+    min-width: 0; /* Tránh vỡ layout flex */
+}
+
+/* --- THANH CÔNG CỤ (TOOLBAR) --- */
+.dashboard-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card);
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.toolbar-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* --- KPI CARDS (Hàng trên cùng) --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 cột đều nhau */
+    gap: 1rem;
+    margin: 0;
+}
+
+.kpi-card {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    height: fit-content;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    border-color: var(--primary-dim);
+}
+
+.kpi-title {
+    font-size: 0.85rem;
+    color: var(--secondary-foreground);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--foreground);
+    font-family: var(--font-mono); /* Dùng font số riêng cho đẹp */
+}
+
+.kpi-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+    padding: 10px;
+    border-radius: 50%;
+    background-color: var(--input); /* Nền nhẹ cho icon */
+}
+
+/* --- BIỂU ĐỒ (CHARTS SECTION) --- */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Biểu đồ đường rộng gấp đôi biểu đồ tròn */
+    gap: 1rem;
+    min-height: 360px;
+    margin: 0 0 -8px 0;
+    flex: 0 0 auto;
+}
+
+.chart-container {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    margin: 0;
+}
+
+.chart-container h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--foreground);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+#trendChart {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.chart-wrapper {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* --- BẢNG DỮ LIỆU (DATA TABLE) --- */
+.data-table-container {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden; /* Bo góc cho bảng */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    height: 100%;
+}
+
+.table-responsive {
+    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng quá rộng */
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+thead {
+    background-color: var(--card-header);
+}
+
+th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--secondary-foreground);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    vertical-align: middle;
+}
+
+tbody tr:hover {
+    background-color: var(--input); /* Highlight dòng khi di chuột */
+}
+
+/* Màu riêng cho cột ID */
+td:first-child {
+    font-family: var(--font-mono);
+    color: var(--primary);
+    font-weight: 600;
+}
