@@ -1,5 +1,5 @@
 // --- CẤU HÌNH ---
-const FPS_TARGET = 5; 
+const FPS_TARGET = 2; 
 const FRAME_INTERVAL = 1000 / FPS_TARGET;
 
 // --- DOM ELEMENTS ---

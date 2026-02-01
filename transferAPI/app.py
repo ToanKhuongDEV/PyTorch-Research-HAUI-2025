@@ -205,6 +205,7 @@ async def process_pipeline(file: UploadFile = File(...)):
         current_track_id = None
         detected = False
         cropped_img = None # Biến để lưu ảnh cắt
+        is_new_object = False
         
         # --- BƯỚC 1: VALIDATION (CHẠY TRÊN ẢNH GỐC) ---
         img_t = transform_validation(img) # Dùng ảnh gốc
@@ -218,12 +219,16 @@ async def process_pipeline(file: UploadFile = File(...)):
             ood_model = ood_pipeline["ood_model"]
             vector_pca = pca.transform(vector_raw)
             is_in_domain = ood_model.predict(vector_pca)[0]
+
+            print(f"🔍 DEBUG DOMAIN: {is_in_domain} (1=OK, -1=Out)")
             
             if is_in_domain == -1:
                 status_res = "INVALID"
                 defect_label = "Sai domain"
                 confidence = 0.0
                 # pass
+            else:
+                print("⚠️ Cảnh báo: ood_pipeline chưa được load, bỏ qua kiểm tra domain.")
         
         # --- BƯỚC 2: YOLO TRACKING & CROP ---
         if status_res == "OK":
@@ -241,8 +246,12 @@ async def process_pipeline(file: UploadFile = File(...)):
                     
                     if b.id is not None:
                         current_track_id = int(b.id.item())
-                        counted_ids.add(current_track_id)
-                    break 
+                        
+                        # Kiểm tra nếu ID này chưa từng đếm
+                        if current_track_id not in counted_ids:
+                            counted_ids.add(current_track_id)
+                            is_new_object = True  # Đánh dấu là vật thể mới -> Cho phép ghi DB
+                    break
             
             # --- BƯỚC 3: SVM CLASSIFICATION (CHẠY TRÊN ẢNH ĐÃ CẮT) ---
             if detected and cropped_img:
@@ -266,15 +275,17 @@ async def process_pipeline(file: UploadFile = File(...)):
         process_time = (time.time() - start_time) * 1000
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        try:
-            conn = sqlite3.connect(DB_NAME)
-            c = conn.cursor()
-            c.execute("INSERT INTO inspections (timestamp, status, defect_type, confidence, process_time) VALUES (?, ?, ?, ?, ?)",
-                      (timestamp, status_res, defect_label, float(confidence), round(process_time, 2)))
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            print(f"❌ DB Error: {e}")
+        if is_new_object:
+            try:
+                conn = sqlite3.connect(DB_NAME)
+                c = conn.cursor()
+                c.execute("INSERT INTO inspections (timestamp, status, defect_type, confidence, process_time) VALUES (?, ?, ?, ?, ?)",
+                          (timestamp, status_res, defect_label, float(confidence), round(process_time, 2)))
+                conn.commit()
+                conn.close()
+                print(f"✅ Đã lưu vật thể #{current_track_id} vào DB")
+            except Exception as e:
+                print(f"❌ DB Error: {e}")
 
         # Cập nhật HISTORY_LOG
         log_entry = {
