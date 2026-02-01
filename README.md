@@ -43,7 +43,6 @@ Mở terminal tại thư mục gốc của dự án:
 
     ```bash
     pip install -r requirements.txt
-    pip install ultralytics  # Cài thêm thư viện YOLO
     ```
 
 ### Bước 2: Chuẩn bị Model và Dữ liệu
@@ -95,50 +94,29 @@ Tuyệt đối không mở trực tiếp file HTML (double click). Bạn phải 
 
 -----
 
-## 📖 Hướng Dẫn Sử Dụng
-
-### Chế độ Video Realtime (`video.html`)
-
-1.  Chọn Camera từ danh sách thả xuống (nếu máy có nhiều cam).
-2.  Nhấn "Bắt đầu".
-3.  Đưa vật thể vào trước camera.
-       Nếu có lỗi: Khung đỏ hiện lên kèm tên lỗi.
-       Nếu không có vật: Hiện chữ vàng "Không phát hiện vật thể".
-       Nếu ảnh lạ: Hiện chữ xám "Sai domain".
-4.  Xem ảnh đang xử lý ở cột bên phải và nhật ký lỗi bên dưới.
-
-### Chế độ Chụp Ảnh (`photo.html`)
-
-1.  Nhấn nút "Bật Camera".
-2.  Nhấn "Chụp Ảnh".
-3.  Hệ thống sẽ gửi ảnh lên server, chạy qua Pipeline và trả về kết quả chi tiết trong Modal.
-4.  Hoặc nhấn "Upload Ảnh" để chọn file từ máy tính.
-
------
-
 ## 📁 Cấu Trúc Thư Mục Dự Án
 
 ```
 PyTorch-Research-HAUI-2025/
-├── front-end/                # GIAO DIỆN NGƯỜI DÙNG
-│   ├── css/                  # (style.css, components/...)
-│   ├── js/                   # MÃ NGUỒN FRONTEND
-│   │   ├── api.js            # Gọi API (/process-pipeline)
-│   │   ├── camera.js         # Xử lý Webcam
-│   │   ├── main.js           # Logic trang Chụp ảnh
-│   │   ├── store.js          # Quản lý dữ liệu
-│   │   ├── ui.js             # Vẽ giao diện
-│   │   └── ...
-│   ├── photo.html            # Trang Chụp ảnh/Upload
-│   └── video.html            # Trang Video Realtime
+├── front-end/              # GIAO DIỆN NGƯỜI DÙNG
+│   ├── css/                    # (style, base, components, layout, pages)
+│   ├── js/                     # MÃ NGUỒN FRONTEND
+│   │   ├── core.js                 # AppStore (State), APIManager, Theme
+│   │   ├── camera-lib.js           # Xử lý Camera & Tính toán Metadata ảnh
+│   │   ├── page-dashboard.js       # Logic trang Thống kê
+│   │   ├── page-photo.js           # Logic trang Chụp ảnh
+│   │   ├── page-video.js           # Logic trang Video Realtime
+│   ├── photo.html              # Trang Chụp ảnh/Upload
+│   ├── video.html              # Trang Video Realtime
+|   └── dashboard.html          # Trang Thống kê
 │
-├── transferAPI/              # BACKEND SERVER
-│   ├── app.py                # File chính chạy Server (Pipeline Logic)
-│   ├── model_def.py          # Định nghĩa mạng ResNet
-│   ├── extract_vector.py     # Script tạo dữ liệu Validation
-│   ├── requirements.txt      # Danh sách thư viện
-│   └── saved/                # KHO CHỨA MODEL
-│       ├── yolo.pt           # Model YOLO
+├── transferAPI/            # BACKEND SERVER
+│   ├── app.py                  # File chính chạy Server (Pipeline Logic)
+│   ├── model_def.py            # Định nghĩa mạng ResNet
+│   ├── extract_vector.py       # Script tạo dữ liệu Validation
+│   ├── requirements.txt        # Danh sách thư viện
+│   └── saved/                  # KHO CHỨA MODEL
+│       ├── yolo.pt                 
 │       ├── resnet_weights.pth
 │       ├── vector_trung_binh.npy
 │       └── ...
