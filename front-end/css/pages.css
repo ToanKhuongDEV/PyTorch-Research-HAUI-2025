@@ -9,9 +9,9 @@
   justify-content: baseline;
   align-items: center;
   gap: 10px;
-  background-color: var(--background);
-  padding: 0.5rem;
-  border: 1px solid var(--border);
+  /* background-color: var(--background); */
+  /* padding: 0.5rem; */
+  /* border: 1px solid var(--border); */
   border-radius: var(--radius);
   margin: 0;
   flex-wrap: wrap;
