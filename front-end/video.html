@@ -56,11 +56,15 @@
                         <select class="select" id="cameraSelect">
                             <option value="">Chọn camera</option>
                         </select>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <i class="fas fa-search-plus" title="Thu phóng (lọc viền đen)" style="color:var(--secondary-foreground)"></i>
+                            <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" style="width:70px;">
+                        </div>
                         <button class="btn btn-default" id="start-video">
-                            <i class="fas fa-play"></i> Bắt đầu
+                            <i class="fas fa-play"></i> Bật
                         </button>
                         <button class="btn btn-destructive" id="stop-video" disabled>
-                            <i class="fas fa-stop"></i> Dừng lại
+                            <i class="fas fa-stop"></i> Tắt
                         </button>
                     </div>
 

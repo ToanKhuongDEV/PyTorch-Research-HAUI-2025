@@ -24,6 +24,7 @@
   /* QUAN TRỌNG: Hiển thị hình vuông */
   aspect-ratio: 1 / 1;
   padding-top: 0 !important;
+  overflow: hidden;
 
   border-radius: var(--radius);
   border: 4px solid #000;
@@ -128,6 +129,7 @@
   border-radius: var(--radius);
   flex-shrink: 0;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 .image-item:hover {
   border-color: var(--primary);

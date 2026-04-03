@@ -73,8 +73,11 @@ function aggregateChartData(data, filterType) {
 
         if (!groups[key]) groups[key] = { ok: 0, ng: 0 };
         
-        if (item.status === 'OK') groups[key].ok++;
-        else groups[key].ng++;
+        if (item.status !== 'NG') {
+            groups[key].ok++;
+        } else if (item.status === 'NG') {
+            groups[key].ng++;
+        }
     });
 
     // Sắp xếp các key theo thứ tự thời gian tăng dần
@@ -235,28 +238,52 @@ function renderCharts(data, filterType) {
     });
 }
 
-function exportToCSV() {
+async function exportToCSV() {
     const filterType = document.getElementById('timeFilter').value;
-    const dataToExport = filterDataByTime(allData, filterType);
+    const okNgDataToExport = filterDataByTime(allData, filterType);
 
-    if (!dataToExport.length) {
-        alert("Không có dữ liệu để xuất!");
-        return;
+    // 1. Tải dữ liệu OK + NG (Đã filter theo thời gian trên giao diện)
+    if (okNgDataToExport.length === 0) {
+        alert("Không có dữ liệu hợp lệ (OK/NG) để xuất!");
+    } else {
+        let csvContent = "\uFEFF"; 
+        csvContent += "ID,Time,Status,Defect Type,Confidence,Process Time (ms)\n";
+        okNgDataToExport.forEach(row => {
+            csvContent += `${row.id},${row.timestamp},${row.status},"${row.defect_type}",${row.confidence},${row.process_time}\n`;
+        });
+        triggerDownload(csvContent, `report_OK_NG_${filterType}_${Date.now()}.csv`);
     }
-    
-    let csvContent = "\uFEFF"; 
-    csvContent += "ID,Time,Status,Defect Type,Confidence,Process Time (ms)\n";
 
-    dataToExport.forEach(row => {
-        csvContent += `${row.id},${row.timestamp},${row.status},"${row.defect_type}",${row.confidence},${row.process_time}\n`;
-    });
+    // 2. Tải thêm file Invalid
+    try {
+        const response = await fetch("http://127.0.0.1:8000/invalid-statistics");
+        if (response.ok) {
+            const invalidData = await response.json();
+            const invalidDataToExport = filterDataByTime(invalidData, filterType);
+            
+            if (invalidDataToExport.length > 0) {
+                let csvContentInv = "\uFEFF"; 
+                csvContentInv += "ID,Time,Status,Defect Type,Confidence,Process Time (ms)\n";
+                invalidDataToExport.forEach(row => {
+                    csvContentInv += `${row.id},${row.timestamp},${row.status},"${row.defect_type}",${row.confidence},${row.process_time}\n`;
+                });
+                triggerDownload(csvContentInv, `report_INVALID_${filterType}_${Date.now()}.csv`);
+            }
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu invalid:", error);
+    }
+}
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+// Hàm hỗ trợ tải file
+function triggerDownload(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `report_${filterType}_${Date.now()}.csv`);
+    link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
 }

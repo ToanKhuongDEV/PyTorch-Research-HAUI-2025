@@ -3,7 +3,7 @@ const FPS_TARGET = 2;
 const FRAME_INTERVAL = 1000 / FPS_TARGET;
 
 // --- DOM ELEMENTS ---
-const cameraSelect = document.getElementById('cameraSelect'); // [MỚI]
+const cameraSelect = document.getElementById('cameraSelect');
 const startBtn = document.getElementById('start-video');
 const stopBtn = document.getElementById('stop-video');
 const displayDiv = document.getElementById('video-display');
@@ -27,7 +27,8 @@ let canvas = document.createElement('canvas');
 canvas.className = 'video-feed';
 canvas.style.width = "100%";
 canvas.style.height = "100%";
-canvas.style.objectFit = "contain";
+canvas.style.objectFit = "cover";
+canvas.style.aspectRatio = "1/1";
 let ctx = canvas.getContext('2d');
 
 let isRunning = false;
@@ -39,10 +40,10 @@ let objectCount = 0;
 
 const api = new APIManager({ getMetadata: () => {}, updateMetadata: () => {} });
 
-// --- [MỚI] HÀM LOAD DANH SÁCH CAMERA ---
+// --- HÀM LOAD DANH SÁCH CAMERA ---
 async function loadCameras() {
     try {
-        // Xin quyền trước để lấy được tên thiết bị (Label)
+        // Xin quyền trước để lấy được tên thiết bị
         await navigator.mediaDevices.getUserMedia({ video: true });
         
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -72,17 +73,16 @@ async function loadCameras() {
 // Gọi load camera ngay khi trang tải xong
 document.addEventListener('DOMContentLoaded', loadCameras);
 
-// --- HÀM KHỞI ĐỘNG (CẬP NHẬT) ---
+// --- HÀM KHỞI ĐỘNG ---
 startBtn.addEventListener('click', async () => {
     try {
-        // [MỚI] Lấy ID camera đang chọn
+        // Lấy ID camera đang chọn
         const selectedDeviceId = cameraSelect.value;
         const constraints = {
             video: {
                 deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-                width: { ideal: 640 }, // Ưu tiên độ phân giải này
-                height: { ideal: 480 },
-                frameRate: { ideal: 15 }
+                width: { ideal: 1280 },
+                height: { ideal:1720 }
             }
         };
 
@@ -111,7 +111,7 @@ startBtn.addEventListener('click', async () => {
     }
 });
 
-// --- HÀM DỪNG (CẬP NHẬT) ---
+// --- HÀM DỪNG ---
 stopBtn.addEventListener('click', () => {
     isRunning = false;
     if (stream) {
@@ -128,7 +128,7 @@ stopBtn.addEventListener('click', () => {
     updateStatusUI(false);
 });
 
-// --- UI UTILS & LOGIC KHÁC (GIỮ NGUYÊN) ---
+// --- UI UTILS & LOGIC KHÁC ---
 function updateStatusUI(active) {
     if (active) {
         stCam.textContent = "ĐANG CHẠY";
@@ -190,34 +190,38 @@ function addLog(message, conf, colorClass, imageSrc) {
 async function loop(timestamp) {
     if (!isRunning) return;
 
-    // CẮT ẢNH VUÔNG (CENTER CROP) 
+    // CẮT ẢNH VUÔNG CÓ ZOOM
     const vw = videoElement.videoWidth;
     const vh = videoElement.videoHeight;
-
+    
     // Chưa load được kích thước video thì đợi frame sau
     if (vw === 0 || vh === 0) {
         requestAnimationFrame(loop);
         return;
     }
 
-    const size = Math.min(vw, vh);
-    const sx = (vw - size) / 2;
-    const sy = (vh - size) / 2;
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomVal = zoomSlider ? parseFloat(zoomSlider.value) : 1;
+    
+    const rawCropSize = Math.min(vw, vh) / zoomVal;
+    const sx = (vw - rawCropSize) / 2;
+    const sy = (vh - rawCropSize) / 2;
+    const displaySize = Math.floor(Math.min(vw, vh));
 
-    // Đặt kích thước canvas xử lý thành vuông
-    if (canvas.width !== size || canvas.height !== size) {
-        canvas.width = size;
-        canvas.height = size;
+    // Đặt kích thước canvas xử lý thành vuông (giữ nguyên độ phân giải gốc cao nhất)
+    if (canvas.width !== displaySize || canvas.height !== displaySize) {
+        canvas.width = displaySize;
+        canvas.height = displaySize;
         // Preview canvas vuông
-        previewCanvas.width = size;
-        previewCanvas.height = size;
+        previewCanvas.width = displaySize;
+        previewCanvas.height = displaySize;
     }
 
-    // Vẽ phần trung tâm video vào canvas
+    // Vẽ phần trung tâm video đã zoom vào canvas
     ctx.save();
-    ctx.translate(size, 0);
+    ctx.translate(displaySize, 0);
     ctx.scale(-1, 1);
-    ctx.drawImage(videoElement, sx, sy, size, size, 0, 0, size, size);
+    ctx.drawImage(videoElement, sx, sy, rawCropSize, rawCropSize, 0, 0, displaySize, displaySize);
     ctx.restore();
 
     frameCount++;

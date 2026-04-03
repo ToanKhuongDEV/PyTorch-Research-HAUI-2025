@@ -26,7 +26,7 @@ def seed_database():
                   confidence REAL,
                   process_time REAL)''')
     
-    # Xóa dữ liệu cũ (Tùy chọn, bỏ comment nếu muốn xóa sạch làm lại)
+    # Xóa dữ liệu cũ để tránh rác nếu cần (hiện đang comment)
     # c.execute("DELETE FROM inspections")
     
     # Tạo 100 bản ghi
@@ -37,10 +37,10 @@ def seed_database():
         random_minutes = random.randint(1, 10080) 
         timestamp = (now - timedelta(minutes=random_minutes)).strftime("%Y-%m-%d %H:%M:%S")
         
-        is_defect = random.choices([True, False], weights=[0.7, 0.3])[0]
+        # Chỉ tạo ra dữ liệu OK và NG (Lỗi), tuyệt đối KHÔNG có INVALID
+        status = random.choices(["OK", "NG"], weights=[0.4, 0.6])[0]
         
-        if is_defect:
-            status = "NG"
+        if status == "NG":
             defect_type = random.choice(DEFECT_TYPES)
             confidence = round(random.uniform(0.80, 0.99), 2)
         else:

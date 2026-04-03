@@ -96,7 +96,7 @@
 
 /* Cột 1: Navbar */
 .nav-column {
-  width: 240px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;

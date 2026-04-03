@@ -63,19 +63,24 @@ class CameraManager {
         const ctx = canvas.getContext('2d');
         const vw = videoFeed.videoWidth;
         const vh = videoFeed.videoHeight;
-        const size = Math.min(vw, vh);
-        const sx = (vw - size) / 2;
-        const sy = (vh - size) / 2;
+        
+        const zoomSlider = document.getElementById('zoomSlider');
+        const zoomVal = zoomSlider ? parseFloat(zoomSlider.value) : 1;
+        
+        const rawCropSize = Math.min(vw, vh) / zoomVal;
+        const sx = (vw - rawCropSize) / 2;
+        const sy = (vh - rawCropSize) / 2;
+        const displaySize = Math.floor(Math.min(vw, vh));
 
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = displaySize;
+        canvas.height = displaySize;
         ctx.save();
-        ctx.translate(size, 0);
+        ctx.translate(displaySize, 0);
         ctx.scale(-1, 1); 
-        ctx.drawImage(videoFeed, sx, sy, size, size, 0, 0, size, size);
+        ctx.drawImage(videoFeed, sx, sy, rawCropSize, rawCropSize, 0, 0, displaySize, displaySize);
         ctx.restore();
 
-        return { imageData: canvas.toDataURL('image/jpeg', 0.9), canvas, width: size, height: size };
+        return { imageData: canvas.toDataURL('image/jpeg', 0.9), canvas, width: displaySize, height: displaySize };
     }
 }
 

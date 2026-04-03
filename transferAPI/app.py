@@ -172,6 +172,15 @@ def init_db():
                 confidence REAL,
                 process_time REAL
             )''')
+    c.execute('''
+            CREATE TABLE IF NOT EXISTS invalid_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                status TEXT,
+                defect_type TEXT,
+                confidence REAL,
+                process_time REAL
+            )''')
     conn.commit()
     conn.close()
 
@@ -275,7 +284,19 @@ async def process_pipeline(file: UploadFile = File(...)):
         process_time = (time.time() - start_time) * 1000
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        if is_new_object:
+        if status_res == "INVALID":
+            try:
+                conn = sqlite3.connect(DB_NAME)
+                c = conn.cursor()
+                c.execute("INSERT INTO invalid_logs (timestamp, status, defect_type, confidence, process_time) VALUES (?, ?, ?, ?, ?)",
+                          (timestamp, status_res, defect_label, float(confidence), round(process_time, 2)))
+                conn.commit()
+                conn.close()
+                print(f"⚠️ Đã lưu cảnh báo INVALID (Domain) vào DB invalid_logs")
+            except Exception as e:
+                print(f"❌ DB Error (Invalid Logs): {e}")
+
+        elif is_new_object:
             try:
                 conn = sqlite3.connect(DB_NAME)
                 c = conn.cursor()
@@ -323,7 +344,20 @@ async def get_statistics():
         conn = sqlite3.connect(DB_NAME)
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute("SELECT * FROM inspections ORDER BY id DESC LIMIT 100")
+        c.execute("SELECT * FROM inspections ORDER BY id DESC")
+        rows = c.fetchall()
+        conn.close()
+        return JSONResponse([dict(row) for row in rows])
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.get("/invalid-statistics")
+async def get_invalid_statistics():
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT * FROM invalid_logs ORDER BY id DESC")
         rows = c.fetchall()
         conn.close()
         return JSONResponse([dict(row) for row in rows])

@@ -72,6 +72,7 @@ class UIManager {
     createImageItem(image, index, metadata) {
         const div = document.createElement('div');
         div.className = 'image-item';
+        div.setAttribute('data-index', index); // Thêm data-index vào thẻ cha
         
         // Xử lý hiển thị an toàn
         const result = metadata.production?.result || 'Đang xử lý...';
@@ -87,9 +88,6 @@ class UIManager {
                     <span class="badge ${getResultClass(result)}">${result}</span>
                     <span class="confidence">${conf}</span>
                 </div>
-            </div>
-            <div class="image-actions">
-                <button class="btn btn-outline btn-sm view-btn" data-index="${index}"><i class="fas fa-eye"></i></button>
             </div>`;
         return div;
     }
@@ -324,6 +322,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         els.status.className = running ? 'badge badge-success' : 'badge badge-destructive';
     });
 
+    const zoomSlider = document.getElementById('zoomSlider');
+    if (zoomSlider) {
+        // Cập nhật DOM của video (scaleX(-1) để lật ảnh + scale(zoomVal) để thu phóng)
+        zoomSlider.addEventListener('input', (e) => {
+            els.videoFeed.style.transform = `scaleX(-1) scale(${e.target.value})`;
+        });
+        // Set mặc định khi load
+        els.videoFeed.style.transform = `scaleX(-1) scale(${zoomSlider.value})`;
+    }
+
     function updateBtnState(running) {
         els.startBtn.disabled = running;
         els.stopBtn.disabled = !running;
@@ -453,9 +461,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     els.clearBtn.addEventListener('click', () => { store.clearAll(); ui.updateImageList(); });
     
     document.getElementById('imageList')?.addEventListener('click', (e) => {
-        const btn = e.target.closest('.view-btn');
-        if (btn) {
-            const idx = parseInt(btn.getAttribute('data-index'));
+        const item = e.target.closest('.image-item');
+        if (item) {
+            const idx = parseInt(item.getAttribute('data-index'));
             modal.openImageModal(store.getImage(idx), idx);
         }
     });
