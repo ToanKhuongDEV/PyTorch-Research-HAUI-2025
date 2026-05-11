@@ -154,7 +154,7 @@ function clearLogs() {
     logContainer.innerHTML = '<div class="empty-state"><p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p></div>';
     objectCount = 0;
     stObj.textContent = 0;
-    stLast.textContent = "---";
+    if (stLast) stLast.textContent = "---";
 }
 
 function addLog(message, conf, colorClass, imageSrc) {
@@ -261,7 +261,7 @@ async function resetServerCount() {
 
 function handleResult(result) {
 ctx.lineWidth = 3;
-    ctx.font = "18px Arial";
+    ctx.font = "600 18px Inter, Arial, sans-serif";
 
     if (result.total_count !== undefined) {
         stObj.textContent = result.total_count;
@@ -276,7 +276,7 @@ ctx.lineWidth = 3;
         ctx.fillStyle = "red";
         ctx.fillRect(x1, y1 - 45, 180, 45); 
         ctx.fillStyle = "white";
-        ctx.font = "bold 16px Arial";
+        ctx.font = "700 16px Inter, Arial, sans-serif";
         ctx.fillText(`${result.message}`, x1 + 5, y1 - 25);
 
         // --- BẮT ĐẦU PHẦN SỬA ĐỂ ĐẨY VÀO NHẬT KÝ ---
@@ -293,20 +293,27 @@ ctx.lineWidth = 3;
         );
 
         // Cập nhật trạng thái cuối
-        stLast.textContent = result.message;
+        if (stLast) {
+            stLast.textContent = result.message;
+            stLast.className = "badge badge-destructive";
+        }
     }
     else if (result.status === 'no_object') {
         ctx.fillStyle = "yellow";
         ctx.fillText("Đang chờ vật thể...", 20, 30);
         
-        resultText.textContent = "✅ Trống";
-        resultText.style.color = "#10b981";
+        if (stLast) {
+            stLast.textContent = "Trống";
+            stLast.className = "badge badge-success";
+        }
     } 
     else if (result.status === 'invalid_domain') {
         ctx.fillStyle = "gray";
         ctx.fillText("Ảnh sai domain", 20, 30);
         
-        resultText.textContent = "⛔ Sai domain";
-        resultText.style.color = "#95a5a6";
+        if (stLast) {
+            stLast.textContent = "Sai domain";
+            stLast.className = "badge badge-warning";
+        }
     }
 }

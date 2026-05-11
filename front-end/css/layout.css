@@ -3,7 +3,8 @@
 
 /* --- 1. HEADER --- */
 .header {
-  background-color: var(--card);
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   padding: 0;
   height: 64px;
@@ -11,6 +12,7 @@
   align-items: center;
   flex-shrink: 0;
   z-index: 50;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24), 0 0 22px rgba(59, 130, 246, 0.08);
   transition:
     background-color 0.3s,
     border-color 0.3s;
@@ -40,22 +42,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  box-shadow: var(--shadow-glow);
 }
 
 .logo-text h1 {
   font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--foreground);
+  text-transform: none;
+  letter-spacing: 0;
+  color: #60a5fa;
   font-weight: 700;
+  font-family: var(--font-display);
+  text-shadow: none;
 }
 
 .logo-text p {
   font-size: 0.7rem;
   color: var(--secondary-foreground);
   font-family: var(--font-mono);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .header-actions {
@@ -70,7 +74,7 @@
   color: var(--secondary-foreground);
   width: 36px;
   height: 36px;
-  border-radius: var(--radius);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,6 +85,7 @@
   color: var(--primary);
   border-color: var(--primary);
   background-color: var(--primary-dim);
+  box-shadow: var(--shadow-glow);
 }
 
 /* --- 2. MAIN LAYOUT (3 CỘT) --- */
@@ -91,7 +96,9 @@
   padding: 1rem;
   height: calc(100vh - 64px); /* Full chiều cao trừ header */
   overflow: hidden;
-  background-color: var(--background);
+  background: transparent;
+  position: relative;
+  z-index: 1;
 }
 
 /* Cột 1: Navbar */
@@ -118,24 +125,25 @@
   background-color: transparent;
   color: var(--secondary-foreground);
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: 10px;
   font-size: 0.85rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: 0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .nav-button:hover {
-  background-color: var(--card);
+  background-color: var(--hover-overlay);
   color: var(--foreground);
   transform: translateX(4px);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.18);
 }
 .nav-button.active {
   background-color: var(--primary-dim);
   color: var(--primary);
   border-color: var(--primary-dim);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.05);
+  box-shadow: var(--shadow-glow);
 }
 .nav-button i {
   width: 20px;
@@ -157,7 +165,7 @@
   height: 100%;
   background-color: var(--card);
   border: 1px solid var(--border);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.1);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
@@ -170,9 +178,9 @@
   border-bottom: 1px solid var(--border);
   background-color: var(--card-header);
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--primary);
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
 }
 .center-column .card-content {
   flex: 1;
@@ -242,9 +250,7 @@
     align-items: flex-start;
   }
   .header-container {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+    padding: 0 1rem;
   }
   .modal-content {
     width: 95vw;
