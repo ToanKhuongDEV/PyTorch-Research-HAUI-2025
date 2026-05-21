@@ -19,14 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadData() {
     try {
         const response = await fetch(API_URL);
-        if (!response.ok) throw new Error("Lỗi kết nối API");
+        if (!response.ok) throw new Error("API connection error");
         
         const data = await response.json();
         allData = data; 
         applyFilterAndRender();
         
     } catch (error) {
-        console.error("Lỗi tải dữ liệu:", error);
+        console.error("Data loading error:", error);
     }
 }
 
@@ -133,7 +133,7 @@ function renderTable(data) {
     const recentData = data.slice(0, 20); // 20 dòng mới nhất
 
     if (recentData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">Không có dữ liệu</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">No data</td></tr>`;
         return;
     }
 
@@ -170,7 +170,7 @@ function renderCharts(data, filterType) {
     chartPie = new Chart(pieCtx, {
         type: 'doughnut',
         data: {
-            labels: Object.keys(defectCounts).length ? Object.keys(defectCounts) : ['Không có lỗi'],
+            labels: Object.keys(defectCounts).length ? Object.keys(defectCounts) : ['No defects'],
             datasets: [{
                 data: Object.keys(defectCounts).length ? Object.values(defectCounts) : [1],
                 backgroundColor: Object.keys(defectCounts).length ? ['#e74c3c', '#f1c40f', '#e67e22', '#9b59b6'] : ['#2d333b'],
@@ -196,14 +196,14 @@ function renderCharts(data, filterType) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Sản phẩm Lỗi (NG)',
+                    label: 'Defective Products (NG)',
                     data: ngData,
                     backgroundColor: '#ff3333', // Màu đỏ cho lỗi
                     barThickness: 'flex',
                     maxBarThickness: 30
                 },
                 {
-                    label: 'Sản phẩm Đạt (OK)',
+                    label: 'Passed Products (OK)',
                     data: okData,
                     backgroundColor: '#00ff66', // Màu xanh cho OK
                     barThickness: 'flex',
@@ -244,7 +244,7 @@ async function exportToCSV() {
 
     // 1. Tải dữ liệu OK + NG (Đã filter theo thời gian trên giao diện)
     if (okNgDataToExport.length === 0) {
-        alert("Không có dữ liệu hợp lệ (OK/NG) để xuất!");
+        alert("No valid data (OK/NG) to export!");
     } else {
         let csvContent = "\uFEFF"; 
         csvContent += "ID,Time,Status,Defect Type,Confidence,Process Time (ms)\n";
@@ -271,7 +271,7 @@ async function exportToCSV() {
             }
         }
     } catch (error) {
-        console.error("Lỗi khi tải dữ liệu invalid:", error);
+        console.error("Error loading invalid data:", error);
     }
 }
 

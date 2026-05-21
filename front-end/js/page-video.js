@@ -43,17 +43,16 @@ const api = new APIManager({ getMetadata: () => {}, updateMetadata: () => {} });
 // --- HÀM LOAD DANH SÁCH CAMERA ---
 async function loadCameras() {
     try {
-        // Xin quyền trước để lấy được tên thiết bị
-        await navigator.mediaDevices.getUserMedia({ video: true });
+        // Lấy danh sách camera mà không xin quyền ngay lập tức (tránh hiện popup)
         
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
 
-        cameraSelect.innerHTML = '';
+        cameraSelect.innerHTML = '<option value="">Select Camera</option>';
         
         if (videoDevices.length === 0) {
             const option = document.createElement('option');
-            option.text = "Không tìm thấy camera";
+            option.text = "No camera found";
             cameraSelect.appendChild(option);
             return;
         }
@@ -65,8 +64,8 @@ async function loadCameras() {
             cameraSelect.appendChild(option);
         });
     } catch (err) {
-        console.error("Lỗi load camera:", err);
-        cameraSelect.innerHTML = '<option value="">Lỗi quyền truy cập</option>';
+        console.error("Error loading camera:", err);
+        cameraSelect.innerHTML = '<option value="">Access denied</option>';
     }
 }
 
@@ -107,7 +106,7 @@ startBtn.addEventListener('click', async () => {
             loop(0);
         };
     } catch (err) {
-        alert("Không thể truy cập camera: " + err.message);
+        alert("Cannot access camera: " + err.message);
     }
 });
 
@@ -131,7 +130,7 @@ stopBtn.addEventListener('click', () => {
 // --- UI UTILS & LOGIC KHÁC ---
 function updateStatusUI(active) {
     if (active) {
-        stCam.textContent = "ĐANG CHẠY";
+        stCam.textContent = "RUNNING";
         stCam.className = "badge badge-success";
         stCam.style.color = "";
         
@@ -139,7 +138,7 @@ function updateStatusUI(active) {
         stopBtn.disabled = false;
         cameraSelect.disabled = true;
     } else {
-        stCam.textContent = "ĐANG TẮT";
+        stCam.textContent = "STOPPED";
         stCam.className = "badge badge-destructive";
         stCam.style.color = "";
         
@@ -151,7 +150,7 @@ function updateStatusUI(active) {
 }
 
 function clearLogs() {
-    logContainer.innerHTML = '<div class="empty-state"><p style="color: #aaa; text-align: center; margin-top: 20px;">Chưa có dữ liệu</p></div>';
+    logContainer.innerHTML = '<div class="empty-state"><p style="color: #aaa; text-align: center; margin-top: 20px;">No data available</p></div>';
     objectCount = 0;
     stObj.textContent = 0;
     if (stLast) stLast.textContent = "---";
@@ -253,7 +252,7 @@ async function resetServerCount() {
         await fetch('http://127.0.0.1:8000/reset-count', { method: 'POST' });
         clearLogs(); // Xóa log cũ trên giao diện
         stObj.textContent = "0"; // Reset số hiển thị về 0
-        alert("Đã reset bộ đếm hệ thống!");
+        alert("System counter reset!");
     } catch (e) {
         console.error(e);
     }
@@ -300,19 +299,19 @@ ctx.lineWidth = 3;
     }
     else if (result.status === 'no_object') {
         ctx.fillStyle = "yellow";
-        ctx.fillText("Đang chờ vật thể...", 20, 30);
+        ctx.fillText("Waiting for object...", 20, 30);
         
         if (stLast) {
-            stLast.textContent = "Trống";
+            stLast.textContent = "Empty";
             stLast.className = "badge badge-success";
         }
     } 
     else if (result.status === 'invalid_domain') {
         ctx.fillStyle = "gray";
-        ctx.fillText("Ảnh sai domain", 20, 30);
+        ctx.fillText("Invalid domain", 20, 30);
         
         if (stLast) {
-            stLast.textContent = "Sai domain";
+            stLast.textContent = "Invalid domain";
             stLast.className = "badge badge-warning";
         }
     }

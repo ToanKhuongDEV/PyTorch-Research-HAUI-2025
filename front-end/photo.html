@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Nhận Diện Khuyết Tật Kim Loại</title>
+    <title>Metal Defect Detection System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -13,13 +13,13 @@
         <div class="header-container">
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-industry"></i></div> <div class="logo-text">
-                    <h1>Hệ Thống Nhận Diện Khuyết Tật</h1>
+                    <h1>Defect Detection System</h1>
                     <p>Industrial Metal Surface Defect Detection</p>
                 </div>
             </div>
 
             <div class="header-actions">
-                <button class="theme-toggle" id="themeToggleBtn" title="Đổi giao diện Sáng/Tối">
+                <button class="theme-toggle" id="themeToggleBtn" title="Toggle Light/Dark Theme">
                     <i class="fas fa-sun"></i>
                 </button>
             </div>
@@ -36,13 +36,13 @@
                 </div>
                 <div class="card-content" style="padding: 0.5rem; gap: 0.5rem; display: flex; flex-direction: column;">
                     <button class="nav-button active" onclick="location.href='photo.html'">
-                        <i class="fas fa-camera"></i> Chụp Ảnh
+                        <i class="fas fa-camera"></i> Snapshot
                     </button>
                     <button class="nav-button" onclick="location.href='video.html'">
-                        <i class="fas fa-video"></i> Video Realtime
+                        <i class="fas fa-video"></i> Live Feed
                     </button>
                     <button class="nav-button" onclick="location.href='dashboard.html'">
-                        <i class="fas fa-chart-bar"></i> Thống Kê
+                        <i class="fas fa-chart-bar"></i> Analytics
                     </button>
                 </div>
             </div>
@@ -59,38 +59,34 @@
                 <div class="card-content">
                     <div class="camera-controls">
                         <select class="select" id="cameraSelect">
-                            <option value="">Chọn camera</option>
+                            <option value="">Select Camera</option>
                         </select>
                         <div style="display:flex; align-items:center; gap:5px;">
-                            <i class="fas fa-search-plus" title="Thu phóng (lọc viền đen)" style="color:var(--secondary-foreground)"></i>
+                            <i class="fas fa-search-plus" title="Zoom (Crop Black Borders)" style="color:var(--secondary-foreground)"></i>
                             <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" style="width:70px;">
                         </div>
                         
                         <button class="btn btn-default" id="startCameraBtn">
                             <i class="fas fa-play"></i> 
-                            Bật
+                            Start
                         </button>
                         
                         <button class="btn btn-destructive" id="stopCameraBtn" disabled>
                             <i class="fas fa-stop"></i>
-                            Tắt
+                            Stop
                         </button>
                         
-                        <button class="btn btn-accent" id="captureBtn" disabled>
-                            <i class="fas fa-camera-retro"></i> 
-                            Chụp
-                        </button>
 
                         <button class="btn btn-accent" id="uploadImageBtn">
                             <i class="fas fa-upload"></i> 
-                            Tải lên
+                            Upload
                         </button>
                     </div>
                     
                     <div class="video-container">
                         <div class="video-placeholder" id="videoPlaceholder">
                             <i class="fas fa-camera"></i>
-                            <p>Camera chưa được khởi động</p>
+                            <p>Camera not started</p>
                         </div>
                         <video class="video-feed hidden" id="videoFeed" autoplay playsinline style="object-fit: cover; width: 100%; height: 100%; aspect-ratio: 1/1;"></video>
                         <div class="video-overlay hidden" id="videoOverlay">
@@ -110,7 +106,7 @@
             
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-server"></i> Trạng Thái</h2>
+                    <h2 class="card-title"><i class="fas fa-server"></i> Status</h2>
                 </div>
                 <div class="card-content" style="padding: 0rem 1rem">
                     <div class="status-container">
@@ -120,10 +116,10 @@
                         </div> -->
                         <div class="info-row">
                             <span>Camera</span>
-                            <span class="badge badge-destructive" id="systemCameraStatus">Tắt</span>
+                            <span class="badge badge-destructive" id="systemCameraStatus">Off</span>
                         </div>
                         <div class="info-row">
-                            <span>Số ảnh</span>
+                            <span>Images</span>
                             <span class="badge badge-outline" id="capturedCount">0</span>
                         </div>
                     </div>
@@ -132,7 +128,7 @@
             
             <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
                 <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-images"></i> Ảnh Đã Chụp</h2>
+                    <h2 class="card-title"><i class="fas fa-images"></i> Captured Images</h2>
                     <button class="btn btn-outline btn-sm hidden" id="clearAllBtn">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -141,7 +137,7 @@
                     <div class="images-container">
                         <div class="empty-state" id="emptyState">
                             <i class="fas fa-image"></i>
-                            <p>Chưa có ảnh</p>
+                            <p>No images available</p>
                         </div>
 
                         <div class="image-list hidden" id="imageList"></div>
@@ -173,34 +169,34 @@
             
             <div class="modal-info">
                 <div class="info-section">
-                    <h3 class="info-section-title">📊 Thông số cơ bản của ảnh</h3>
+                    <h3 class="info-section-title">📊 Basic Image Parameters</h3>
                     <div class="info-grid" id="basicInfo"></div>
                 </div>
                 
                 <div class="info-section">
-                    <h3 class="info-section-title">📷 Thông số camera & chụp ảnh</h3>
+                    <h3 class="info-section-title">📷 Camera & Capture Parameters</h3>
                     <div class="info-grid" id="cameraInfo"></div>
                 </div>
                 
                 <div class="info-section">
-                    <h3 class="info-section-title">🌡️ Thông số môi trường & điều kiện chụp</h3>
+                    <h3 class="info-section-title">🌡️ Environmental & Condition Parameters</h3>
                     <div class="info-grid" id="environmentInfo"></div>
                 </div>
                 
                 <div class="info-section">
-                    <h3 class="info-section-title">⚙️ Thông số hệ thống & xử lý ảnh</h3>
+                    <h3 class="info-section-title">⚙️ System & Processing Parameters</h3>
                     <div class="info-grid" id="systemInfo"></div>
                 </div>
                 
                 <div class="info-section">
-                    <h3 class="info-section-title">🏭 Thông số sản xuất kèm theo ảnh</h3>
+                    <h3 class="info-section-title">🏭 Production Parameters</h3>
                     <div class="info-grid" id="productionInfo"></div>
                 </div>
                 
                 <div class="modal-actions">
                     <button class="btn btn-outline btn-sm" id="downloadModalBtn">
                         <i class="fas fa-download"></i>
-                        Tải xuống
+                        Download
                     </button>
                 </div>
             </div>

@@ -2,3 +2,4 @@
 /transferAPI/.venv/
 /.agents/
 __pycache__/
+*.db

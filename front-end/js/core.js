@@ -115,7 +115,7 @@ class APIManager {
             return await response.json();
         } catch (error) {
             console.error("Pipeline Error:", error);
-            return { status: "error", message: "Lỗi kết nối" };
+            return { status: "error", message: "Connection Error" };
         }
     }
 }

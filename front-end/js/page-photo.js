@@ -41,7 +41,7 @@ class UIManager {
     
     updateImageList() {
         const count = this.store.getImageCount();
-        if (this.elements.capturedCount) this.elements.capturedCount.textContent = `${count} ảnh`;
+        if (this.elements.capturedCount) this.elements.capturedCount.textContent = `${count} images`;
         
         if (count > 0) {
             this.elements.emptyState.classList.add('hidden');
@@ -75,14 +75,14 @@ class UIManager {
         div.setAttribute('data-index', index); // Thêm data-index vào thẻ cha
         
         // Xử lý hiển thị an toàn
-        const result = metadata.production?.result || 'Đang xử lý...';
+        const result = metadata.production?.result || 'Processing...';
         const conf = metadata.production?.confidence || '';
         const time = metadata.captureTime ? new Date(metadata.captureTime).toLocaleTimeString() : '';
 
         div.innerHTML = `
             <img src="${image}" class="image-thumb" data-index="${index}">
             <div class="image-info">
-                <div class="image-name">Ảnh ${index + 1}</div>
+                <div class="image-name">Image ${index + 1}</div>
                 <div class="image-time">${time}</div>
                 <div class="image-classification">
                     <span class="badge ${getResultClass(result)}">${result}</span>
@@ -139,7 +139,7 @@ class UIManager {
         </button>`;
         
         paginationHTML += '</div>';
-        paginationHTML += `<div class="pagination-info">Trang ${currentPage} / ${totalPages}</div>`;
+        paginationHTML += `<div class="pagination-info">Page ${currentPage} / ${totalPages}</div>`;
         
         if (this.elements.paginationContainer) {
             this.elements.paginationContainer.innerHTML = paginationHTML;
@@ -218,37 +218,37 @@ class ModalManager {
         
         if(this.elements.basicInfo) {
             this.elements.basicInfo.innerHTML = `
-                <div class="info-item"><span class="info-label">Kết quả</span><span class="info-value ${getResultClass(meta.production?.result)}">${meta.production?.result || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Độ tin cậy</span><span class="info-value">${meta.production?.confidence || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Độ phân giải</span><span class="info-value">${meta.basic?.resolution || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Kích thước file</span><span class="info-value">${meta.basic?.fileSize || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Định dạng</span><span class="info-value">${meta.basic?.format || 'JPEG'}</span></div>
+                <div class="info-item"><span class="info-label">Result</span><span class="info-value ${getResultClass(meta.production?.result)}">${meta.production?.result || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Confidence</span><span class="info-value">${meta.production?.confidence || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Resolution</span><span class="info-value">${meta.basic?.resolution || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">File Size</span><span class="info-value">${meta.basic?.fileSize || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Format</span><span class="info-value">${meta.basic?.format || 'JPEG'}</span></div>
             `;
         }
         if (this.elements.cameraInfo) {
             this.elements.cameraInfo.innerHTML = `
                 <div class="info-item"><span class="info-label">Camera ID</span><span class="info-value">${meta.camera?.cameraId || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Cảm biến</span><span class="info-value">${meta.camera?.sensorResolution || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Sensor</span><span class="info-value">${meta.camera?.sensorResolution || 'N/A'}</span></div>
             `;
         }
         if (this.elements.environmentInfo) {
             this.elements.environmentInfo.innerHTML = `
-                <div class="info-item"><span class="info-label">Thời gian chụp</span><span class="info-value">${meta.environment?.timestamp || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Nhiệt độ</span><span class="info-value">${meta.environment?.temperature || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Độ ẩm</span><span class="info-value">${meta.environment?.humidity || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Capture Time</span><span class="info-value">${meta.environment?.timestamp || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Temperature</span><span class="info-value">${meta.environment?.temperature || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Humidity</span><span class="info-value">${meta.environment?.humidity || 'N/A'}</span></div>
             `;
         }
         if (this.elements.systemInfo) {
             this.elements.systemInfo.innerHTML = `
-                <div class="info-item"><span class="info-label">Độ sáng (Avg)</span><span class="info-value">${meta.system?.brightness || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Độ tương phản</span><span class="info-value">${meta.system?.contrast || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Độ sắc nét</span><span class="info-value">${meta.system?.sharpness || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Tỷ lệ nhiễu (SNR)</span><span class="info-value">${meta.system?.snr || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Brightness (Avg)</span><span class="info-value">${meta.system?.brightness || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Contrast</span><span class="info-value">${meta.system?.contrast || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Sharpness</span><span class="info-value">${meta.system?.sharpness || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">SNR</span><span class="info-value">${meta.system?.snr || 'N/A'}</span></div>
             `;
         }
         if (this.elements.productionInfo) {
             this.elements.productionInfo.innerHTML = `
-                <div class="info-item"><span class="info-label">Mã sản phẩm</span><span class="info-value">${meta.production?.productId || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Product Code</span><span class="info-value">${meta.production?.productId || 'N/A'}</span></div>
                 <div class="info-item"><span class="info-label">Batch/Lot</span><span class="info-value">${meta.production?.batch || 'N/A'}</span></div>
             `;
         }
@@ -279,7 +279,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         cameraSelect: document.getElementById('cameraSelect'),
         startBtn: document.getElementById('startCameraBtn'),
         stopBtn: document.getElementById('stopCameraBtn'),
-        captureBtn: document.getElementById('captureBtn'),
         status: document.getElementById('systemCameraStatus'),
         clearBtn: document.getElementById('clearAllBtn'),
         canvas: document.getElementById('canvas'),
@@ -293,7 +292,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     async function loadCameras() {
         try {
             const devices = await camera.getCameras();
-            els.cameraSelect.innerHTML = '<option value="">Chọn camera</option>';
+            els.cameraSelect.innerHTML = '<option value="">Select Camera</option>';
             devices.forEach(d => {
                 const opt = document.createElement('option');
                 opt.value = d.deviceId;
@@ -317,9 +316,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         updateBtnState(false);
     });
 
+    let autoCaptureInterval = null;
+
     camera.on('statusChanged', (running) => {
-        els.status.textContent = running ? 'ĐANG CHẠY' : 'ĐANG TẮT';
+        els.status.textContent = running ? 'RUNNING' : 'STOPPED';
         els.status.className = running ? 'badge badge-success' : 'badge badge-destructive';
+        
+        if (running) {
+            if (!autoCaptureInterval) {
+                autoCaptureInterval = setInterval(captureSnapshot, 1000);
+            }
+        } else {
+            if (autoCaptureInterval) {
+                clearInterval(autoCaptureInterval);
+                autoCaptureInterval = null;
+            }
+        }
     });
 
     const zoomSlider = document.getElementById('zoomSlider');
@@ -335,14 +347,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     function updateBtnState(running) {
         els.startBtn.disabled = running;
         els.stopBtn.disabled = !running;
-        els.captureBtn.disabled = !running;
     }
 
     els.startBtn.addEventListener('click', () => camera.startCamera(els.cameraSelect.value));
     els.stopBtn.addEventListener('click', () => camera.stopCamera());
     
     // --- CAPTURE & PIPELINE ---
-    els.captureBtn.addEventListener('click', async () => {
+    async function captureSnapshot() {
         try {
             const result = camera.captureImage(els.videoFeed, els.canvas);
             if (!result) return;
@@ -354,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 result.imageData, index, els.canvas, els.cameraSelect, camera.getCurrentStream()
             );
             meta.captureTime = new Date();
-            meta.production = { result: 'Đang xử lý...', confidence: '...' };
+            meta.production = { result: 'Processing...', confidence: '...' };
             
             store.updateMetadata(index, meta);
             ui.updateImageList();
@@ -364,12 +375,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             updateMetadataWithResult(index, meta, apiRes);
 
         } catch (err) {
-            console.error("Lỗi chụp ảnh:", err);
-            ui.showError("Lỗi xử lý ảnh: " + err.message);
+            console.error("Capture error:", err);
+            ui.showError("Image processing error: " + err.message);
         } finally {
             ui.updateImageList();
         }
-    });
+    }
 
     // --- [FIXED] UPLOAD & PIPELINE ---
     els.uploadBtn.addEventListener('click', () => els.fileInput.click());
@@ -404,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 meta.environment.lightIntensity = 'N/A';
                 
                 meta.captureTime = new Date();
-                meta.production = { result: 'Đang xử lý...', confidence: '...' };
+                meta.production = { result: 'Processing...', confidence: '...' };
 
                 store.updateMetadata(index, meta);
                 ui.updateImageList();
@@ -415,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     updateMetadataWithResult(index, meta, apiRes);
                 } catch(err) {
                     console.error(err);
-                    meta.production.result = "LỖI MẠNG";
+                    meta.production.result = "NETWORK ERROR";
                     store.updateMetadata(index, meta);
                 } finally {
                     ui.updateImageList();
@@ -434,13 +445,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             const confVal = apiRes.confidence ? (apiRes.confidence * 100) : 0;
             meta.production.confidence = confVal.toFixed(1) + "%";
         } else if (apiRes.status === 'invalid_domain') {
-            meta.production.result = "SAI DOMAIN";
+            meta.production.result = "INVALID DOMAIN";
             meta.production.confidence = "N/A";
         } else if (apiRes.status === 'no_object') {
-            meta.production.result = "KHÔNG CÓ VẬT";
+            meta.production.result = "NO OBJECT";
             meta.production.confidence = "100%";
         } else {
-            meta.production.result = "LỖI XỬ LÝ";
+            meta.production.result = "PROCESSING ERROR";
             meta.production.confidence = "0%";
         }
         store.updateMetadata(index, meta);

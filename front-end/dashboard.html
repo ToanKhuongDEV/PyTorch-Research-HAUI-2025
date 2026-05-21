@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Thống Kê Sản Xuất</title>
+    <title>Analytics - Production Statistics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="css/styles.css">
@@ -14,7 +14,7 @@
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-industry"></i></div> 
                 <div class="logo-text">
-                    <h1>Hệ Thống Nhận Diện Khuyết Tật</h1>
+                    <h1>Defect Detection System</h1>
                     <p>Industrial Metal Surface Defect Detection</p>
                 </div>
             </div>
@@ -33,13 +33,13 @@
                 </div>
                 <div class="card-content" style="padding: 0.5rem; gap: 0.5rem; display: flex; flex-direction: column;">
                     <button class="nav-button" onclick="location.href='photo.html'">
-                        <i class="fas fa-camera"></i> Chụp Ảnh
+                        <i class="fas fa-camera"></i> Snapshot
                     </button>
                     <button class="nav-button" onclick="location.href='video.html'">
-                        <i class="fas fa-video"></i> Video Realtime
+                        <i class="fas fa-video"></i> Live Feed
                     </button>
                     <button class="nav-button active" onclick="location.href='dashboard.html'">
-                        <i class="fas fa-chart-bar"></i> Thống Kê
+                        <i class="fas fa-chart-bar"></i> Analytics
                     </button>
                 </div>
             </div>
@@ -49,41 +49,41 @@
             <div class="d-flex" style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; gap: 10px;">
                     <select class="select" id="timeFilter">
-                        <option value="today">Hôm nay</option>
-                        <option value="week">Tuần này</option>
-                        <option value="month">Tháng này</option>
-                        <!-- <option value="all">Toàn bộ</option> -->
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <!-- <option value="all">All Time</option> -->
                     </select>
-                    <button class="btn btn-default" id="refreshBtn"><i class="fas fa-sync"></i> Làm mới</button>
+                    <button class="btn btn-default" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
-                <button class="btn btn-outline" id="exportBtn"><i class="fas fa-file-export"></i> Xuất CSV</button>
+                <button class="btn btn-outline" id="exportBtn"><i class="fas fa-file-export"></i> Export CSV</button>
             </div>
     
             <div class="dashboard-grid">
                 <div class="kpi-card">
                     <div>
-                        <div class="kpi-title">Tổng Kiểm Tra</div>
+                        <div class="kpi-title">Total Inspections</div>
                         <div class="kpi-value" id="kpi-total">0</div>
                     </div>
                     <i class="fas fa-cubes kpi-icon" style="color: var(--primary);"></i>
                 </div>
                 <div class="kpi-card">
                     <div>
-                        <div class="kpi-title">Tỷ Lệ Lỗi</div>
+                        <div class="kpi-title">Defect Rate</div>
                         <div class="kpi-value" id="kpi-rate" style="color: var(--destructive);">0%</div>
                     </div>
                     <i class="fas fa-exclamation-triangle kpi-icon" style="color: var(--destructive);"></i>
                 </div>
                 <div class="kpi-card">
                     <div>
-                        <div class="kpi-title">Sản Phẩm Đạt (OK)</div>
+                        <div class="kpi-title">Passed (OK)</div>
                         <div class="kpi-value" id="kpi-ok" style="color: var(--success);">0</div>
                     </div>
                     <i class="fas fa-check-circle kpi-icon" style="color: var(--success);"></i>
                 </div>
                 <div class="kpi-card">
                     <div>
-                        <div class="kpi-title">Thời Gian TB</div>
+                        <div class="kpi-title">Avg Time</div>
                         <div class="kpi-value" id="kpi-time">0 ms</div>
                     </div>
                     <i class="fas fa-stopwatch kpi-icon" style="color: var(--accent);"></i>
@@ -92,11 +92,11 @@
     
             <div class="charts-grid">
                 <div class="chart-container">
-                    <h3>Xu Hướng</h3>
+                    <h3>Trend Analysis</h3>
                     <canvas id="trendChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3>Phân Bố Loại Lỗi</h3>
+                    <h3>Defect Distribution</h3>
                     <div class="chart-wrapper" style="position: relative; height: 80%;">
                         <canvas id="pieChart"></canvas>
                     </div>
@@ -105,18 +105,18 @@
     
             <div class="data-table-container">
                 <div style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-                    <h3 style="margin: 0;">Lịch Sử Quét Gần Nhất (20 dòng)</h3>
+                    <h3 style="margin: 0;">Recent Scan History (20 rows)</h3>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Thời Gian</th>
-                                <th>Trạng Thái</th>
-                                <th>Loại Lỗi</th>
-                                <th>Độ Tin Cậy</th>
-                                <th>Xử lý (ms)</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Defect Type</th>
+                                <th>Confidence</th>
+                                <th>Processing (ms)</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody"></tbody>

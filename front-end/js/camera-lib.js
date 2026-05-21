@@ -22,13 +22,13 @@ class CameraManager {
             const devices = await navigator.mediaDevices.enumerateDevices();
             return devices.filter(d => d.kind === 'videoinput');
         } catch (err) {
-            this.trigger('error', 'Không thể truy cập danh sách camera');
+            this.trigger('error', 'Cannot access camera list');
             throw err;
         }
     }
     async startCamera(deviceId) {
         try {
-            if (!deviceId) return this.trigger('error', 'Vui lòng chọn camera');
+            if (!deviceId) return this.trigger('error', 'Please select a camera');
             if (this.currentStream) this.currentStream.getTracks().forEach(t => t.stop());
 
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -39,7 +39,7 @@ class CameraManager {
             this.trigger('streamStarted', stream);
             this.trigger('statusChanged', true);
         } catch (err) {
-            this.trigger('error', 'Lỗi khởi động camera: ' + err.message);
+            this.trigger('error', 'Camera start error: ' + err.message);
             this.trigger('statusChanged', false);
         }
     }
@@ -57,7 +57,7 @@ class CameraManager {
     
     captureImage(videoFeed, canvas) {
         if (!this.isStreaming) {
-            this.trigger('error', 'Camera chưa được bật');
+            this.trigger('error', 'Camera is not started');
             return null;
         }
         const ctx = canvas.getContext('2d');
@@ -129,7 +129,7 @@ class MetadataCalculator {
     calculateEnvironmentProperties(now) {
         // Đây là thông số giả lập (vì web không có cảm biến nhiệt độ)
         return { 
-            timestamp: now.toLocaleString('vi-VN'),
+            timestamp: now.toLocaleString('en-US'),
             temperature: 'N/A', // Giả định
             humidity: 'N/A',      // Giả định
             lightIntensity: 'Normal' 

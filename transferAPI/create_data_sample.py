@@ -29,12 +29,12 @@ def seed_database():
     # Xóa dữ liệu cũ để tránh rác nếu cần (hiện đang comment)
     # c.execute("DELETE FROM inspections")
     
-    # Tạo 100 bản ghi
+    # Tạo 500 bản ghi
     now = datetime.now()
     
-    for i in range(100):
-        # Thời gian ngẫu nhiên trong 7 ngày
-        random_minutes = random.randint(1, 10080) 
+    for i in range(500):
+        # Thời gian ngẫu nhiên trong 30 ngày
+        random_minutes = random.randint(1, 43200) 
         timestamp = (now - timedelta(minutes=random_minutes)).strftime("%Y-%m-%d %H:%M:%S")
         
         # Chỉ tạo ra dữ liệu OK và NG (Lỗi), tuyệt đối KHÔNG có INVALID
@@ -55,7 +55,7 @@ def seed_database():
         
     conn.commit()
     conn.close()
-    print("✅ Đã thêm 100 bản ghi thành công!")
+    print("✅ Đã thêm 500 bản ghi thành công!")
 
 if __name__ == "__main__":
     seed_database()
