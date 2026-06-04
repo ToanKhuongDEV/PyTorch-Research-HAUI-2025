@@ -219,7 +219,7 @@ class ModalManager {
         if(this.elements.basicInfo) {
             this.elements.basicInfo.innerHTML = `
                 <div class="info-item"><span class="info-label">Result</span><span class="info-value ${getResultClass(meta.production?.result)}">${meta.production?.result || 'N/A'}</span></div>
-                <div class="info-item"><span class="info-label">Confidence</span><span class="info-value">${meta.production?.confidence || 'N/A'}</span></div>
+                <div class="info-item"><span class="info-label">Confidence</span><span class="info-value">${meta.production?.confidence ?? 'N/A'}</span></div>
                 <div class="info-item"><span class="info-label">Resolution</span><span class="info-value">${meta.basic?.resolution || 'N/A'}</span></div>
                 <div class="info-item"><span class="info-label">File Size</span><span class="info-value">${meta.basic?.fileSize || 'N/A'}</span></div>
                 <div class="info-item"><span class="info-label">Format</span><span class="info-value">${meta.basic?.format || 'JPEG'}</span></div>
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             meta.production.confidence = confVal.toFixed(1) + "%";
         } else if (apiRes.status === 'invalid_domain') {
             meta.production.result = "INVALID DOMAIN";
-            meta.production.confidence = "N/A";
+            meta.production.confidence = "";
         } else if (apiRes.status === 'no_object') {
             meta.production.result = "NO OBJECT";
             meta.production.confidence = "100%";

@@ -84,7 +84,7 @@ body::before {
 
 .theme-toggle {
   border: 0;
-  color: var(--success);
+  color: var(--foreground);
   background: transparent;
   font-size: 0.95rem;
   box-shadow: none;
@@ -94,11 +94,7 @@ body::before {
   border: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--success);
-}
-
-.theme-toggle i {
-  filter: drop-shadow(0 0 7px rgba(40, 199, 99, 0.8));
+  color: var(--foreground);
 }
 
 .main-container {
@@ -315,25 +311,25 @@ body::before {
 }
 
 .badge-success {
-  color: #28c763;
-  border-color: rgba(40, 199, 99, 0.34);
-  text-shadow: 0 0 6px rgba(40, 199, 99, 0.65);
+  color: var(--success);
+  border-color: var(--border);
+  text-shadow: none;
   box-shadow: none;
 }
 
 .badge-destructive,
 .badge-error {
-  color: #ff4157;
-  border-color: rgba(255, 65, 87, 0.38);
-  text-shadow: 0 0 6px rgba(255, 65, 87, 0.55);
+  color: var(--destructive);
+  border-color: var(--border);
+  text-shadow: none;
   box-shadow: none;
 }
 
 .badge-outline,
 .badge-default,
 .badge-warning {
-  color: #69adff;
-  border-color: rgba(94, 168, 255, 0.34);
+  color: var(--primary);
+  border-color: var(--border);
   box-shadow: none;
 }
 
@@ -380,7 +376,7 @@ td {
 }
 
 .kpi-value {
-  color: var(--primary);
+  color: var(--foreground);
   font-size: 1.75rem;
   font-weight: 700;
   text-shadow: none;

@@ -257,7 +257,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(17, 24, 39, 0.82), rgba(2, 6, 23, 0.62));
+  background: var(--secondary);
   color: var(--foreground);
   border-radius: var(--radius);
   cursor: pointer;
@@ -361,7 +361,8 @@
   top: 1rem;
   right: 1rem;
   font-size: 1.5rem;
-  opacity: 0.1;
+  opacity: 0.8;
+  color: var(--primary);
 }
 
 .charts-grid {

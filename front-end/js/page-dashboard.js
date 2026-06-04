@@ -173,7 +173,7 @@ function renderCharts(data, filterType) {
             labels: Object.keys(defectCounts).length ? Object.keys(defectCounts) : ['No defects'],
             datasets: [{
                 data: Object.keys(defectCounts).length ? Object.values(defectCounts) : [1],
-                backgroundColor: Object.keys(defectCounts).length ? ['#e74c3c', '#f1c40f', '#e67e22', '#9b59b6'] : ['#2d333b'],
+                backgroundColor: Object.keys(defectCounts).length ? ['#e63946', '#b92e3aff', '#f4a261', '#e76f51', '#e9c46a', '#f2cc8f'] : ['#2d333b'],
                 borderWidth: 0
             }]
         },
@@ -198,14 +198,14 @@ function renderCharts(data, filterType) {
                 {
                     label: 'Defective Products (NG)',
                     data: ngData,
-                    backgroundColor: '#ff3333', // Màu đỏ cho lỗi
+                    backgroundColor: '#e63946',
                     barThickness: 'flex',
                     maxBarThickness: 30
                 },
                 {
                     label: 'Passed Products (OK)',
                     data: okData,
-                    backgroundColor: '#00ff66', // Màu xanh cho OK
+                    backgroundColor: '#11bc58ff',
                     barThickness: 'flex',
                     maxBarThickness: 30
                 }
